@@ -5,23 +5,23 @@ exports.getAllScreams = (req, res) => {
   db.collection("screams")
     .orderBy("createdAt", "desc")
     .get()
-    .then((snapshot) => {
+    .then(snapshot => {
       let screams = [];
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         screams.push({
           screamId: doc.id,
           body: doc.data().body,
           userHandle: doc.data().userHandle,
-          createdAt: doc.data().createdAt,
+          createdAt: doc.data().createdAt
         });
       });
       return res.status(200).json(screams);
     })
-    .catch((err) => {
+    .catch(err => {
       return res.status(500).json({
         message: "geting screams fail",
         errMessage: err.message,
-        errorCode: err.code,
+        errorCode: err.code
       });
     });
 };
@@ -30,7 +30,7 @@ exports.postOneScream = (req, res) => {
   let newScream = {
     body: req.body.body,
     userHandle: req.userData.userHandle,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   };
 
   let { errors, valid } = validateScreamBody(newScream);
@@ -39,16 +39,16 @@ exports.postOneScream = (req, res) => {
 
   db.collection("screams")
     .add(newScream)
-    .then((snapshot) => {
+    .then(snapshot => {
       return res.status(200).json({
-        message: `scream added with id ${snapshot.id} `,
+        message: `scream added with id ${snapshot.id} `
       });
     })
-    .catch((err) => {
+    .catch(err => {
       return res.status(500).json({
         message: "adding scream fail",
         errMessage: err.message,
-        errorCode: err.code,
+        errorCode: err.code
       });
     });
 };
