@@ -39,7 +39,7 @@ exports.signup = (req, res) => {
               userHandle: newUser.userHandle,
               createdAt: new Date().toISOString(),
               userId: usersnapshot.user.uid,
-              profilePicture: `https://firebasestorage.googleapis.com/v0/b/socialmedia-76e8b.appspot.com/o/no-profile-picture.png?alt=media`
+              profilePictureUrl: `https://firebasestorage.googleapis.com/v0/b/socialmedia-76e8b.appspot.com/o/no-profile-picture.png?alt=media`
             };
 
             db.collection("users")
@@ -108,6 +108,9 @@ exports.uploadImage = (req, res) => {
   let busboy = new Busboy({ headers: req.headers });
   let imageData = {};
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png'){
+      res.status(400).json({ error: 'wrong file type' })
+    }
     let imageExtension = filename.split(".")[filename.split(".").length - 1];
     let imageFileName = `${crypto
       .randomBytes(11)

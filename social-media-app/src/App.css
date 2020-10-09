@@ -10,3 +10,6 @@ body {
   margin: 70px auto 0 auto;
   max-width: 1200px;
 }
+a{
+  text-decoration: none;
+}

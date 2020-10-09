@@ -1,36 +1,41 @@
 const { db } = require("../util/admin");
 const { validateScreamBody } = require("../util/validation");
-
+const cors = require('cors');
+const corsHandler = cors({ origin: true });
 exports.getAllScreams = (req, res) => {
-  db.collection("screams")
-    .orderBy("createdAt", "desc")
-    .get()
-    .then(snapshot => {
-      let screams = [];
-      snapshot.forEach(doc => {
-        screams.push({
-          screamId: doc.id,
-          body: doc.data().body,
-          userHandle: doc.data().userHandle,
-          createdAt: doc.data().createdAt
+  corsHandler(req, res, () => {
+    db.collection("screams")
+      .orderBy("createdAt", "desc")
+      .get()
+      .then(snapshot => {
+        let screams = [];
+        snapshot.forEach(doc => {
+          screams.push({
+            screamId: doc.id,
+            body: doc.data().body,
+            userHandle: doc.data().userHandle,
+            createdAt: doc.data().createdAt,
+            profilePicture: doc.data().profilePicture
+          });
+        });
+        return res.status(200).json(screams);
+      })
+      .catch(err => {
+        return res.status(500).json({
+          message: "geting screams fail",
+          errMessage: err.message,
+          errorCode: err.code
         });
       });
-      return res.status(200).json(screams);
-    })
-    .catch(err => {
-      return res.status(500).json({
-        message: "geting screams fail",
-        errMessage: err.message,
-        errorCode: err.code
-      });
-    });
+  })
 };
 
 exports.postOneScream = (req, res) => {
   let newScream = {
     body: req.body.body,
     userHandle: req.userData.userHandle,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    profilePicture:req.userData.profilePictureUrl
   };
 
   let { errors, valid } = validateScreamBody(newScream);
