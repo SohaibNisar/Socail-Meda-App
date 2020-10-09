@@ -2,7 +2,7 @@ const { db, admin } = require("../util/admin");
 const { firebase } = require("../util/firebaseConfig");
 const { validateSignupData, validateLoginData } = require("../util/validation");
 const { v4: uuidv4 } = require("uuid");
-const Busboy = require("Busboy");
+const Busboy = require("busboy");
 const crypto = require("crypto");
 const os = require("os");
 const fs = require("fs");
@@ -121,7 +121,7 @@ exports.uploadImage = (req, res) => {
     };
     file.resume();
   });
-  busboy.on("finish", function() {
+  busboy.on("finish", function () {
     let uuid = uuidv4();
     admin
       .storage()

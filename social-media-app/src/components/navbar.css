@@ -1,0 +1,13 @@
+.navbar-container {
+    margin: auto;
+}
+
+.navLink {
+    color: #fff;
+    text-decoration: none;
+    border-radius: 3px;
+}
+
+.activeNavLink {
+    background: teal;
+}
