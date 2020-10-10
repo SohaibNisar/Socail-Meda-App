@@ -55,27 +55,26 @@ exports.uploadOnePost = (req, res) => {
   let busboy = new Busboy({ headers: req.headers });
   let imageData = {};
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
-    file
-      .on('data', function (data) {
-        if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
-          res.status(400).json({ error: 'wrong file type' })
-        }
-        let imageExtension = filename.split(".")[filename.split(".").length - 1];
-        let imageFileName = `${crypto
-          .randomBytes(11)
-          .toString("hex")}${new Date().valueOf()}.${imageExtension}`;
-        let filepath = path.join(os.tmpdir(), imageFileName);
-        file.pipe(fs.createWriteStream(filepath));
-        imageData = {
-          imageFileName,
-          filepath,
-          mimetype
-        };
-      })
+    if (req.media == true) {
+      if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+        res.status(400).json({ error: 'wrong file type' })
+      }
+      let imageExtension = filename.split(".")[filename.split(".").length - 1];
+      let imageFileName = `${crypto
+        .randomBytes(11)
+        .toString("hex")}${new Date().valueOf()}.${imageExtension}`;
+      let filepath = path.join(os.tmpdir(), imageFileName);
+      file.pipe(fs.createWriteStream(filepath));
+      imageData = {
+        imageFileName,
+        filepath,
+        mimetype
+      };
+    }
     file.resume();
   });
   busboy.on("finish", function () {
-    if (Object.keys(imageData).length > 0) {
+    if (req.media == true) {
       let uuid = uuidv4();
       admin
         .storage()
@@ -96,7 +95,7 @@ exports.uploadOnePost = (req, res) => {
             .add(newPost)
             .then(snapshot => {
               return res.status(200).json({
-                message: `post added with id ${snapshot.id} `
+                message: `post(media) added with id ${snapshot.id} `
               });
             })
             .catch(err => {

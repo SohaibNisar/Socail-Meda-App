@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 // import { Link } from '@material-ui/core';
-import './scream.css';
+import './post.css';
 
 import withStyles from '@material-ui/core/styles/withStyles';
 import Card from '@material-ui/core/Card';
@@ -26,16 +26,16 @@ const styles = {
     },
 }
 
-class Scream extends Component {
+class Post extends Component {
     render() {
         let { classes } = this.props;
-        let scream = this.props.scream;
-        // console.log(scream)
+        let {post} = this.props;
+        // console.log(post)
         return (
             <Card classes={{ root: classes.card }}>
                 <CardHeader
                     avatar={
-                        <Avatar alt={scream.userHandle} src={scream.profilePicture} />
+                        <Avatar alt={post.userHandle} src={post.profilePicture} />
                     }
                     action={
                         <IconButton aria-label="settings">
@@ -44,13 +44,13 @@ class Scream extends Component {
                     }
                     title={
                         <Link
-                            to={`/user/${scream.userHandle}`}
+                            to={`/user/${post.userHandle}`}
                             style={{fontWeight:'bold',color:'#009688'}}
                         >
-                            {scream.userHandle}
+                            {post.userHandle}
                         </Link>
                     }
-                    subheader={scream.createdAt}
+                    subheader={post.createdAt}
                 />
                 <CardMedia
                     className={classes.media}
@@ -59,7 +59,7 @@ class Scream extends Component {
                 />
                 <CardContent>
                     <Typography variant="body2" color="textSecondary" component="p">
-                        {scream.body}
+                        {post.body}
                     </Typography>
                 </CardContent>
             </Card>
@@ -67,4 +67,4 @@ class Scream extends Component {
     }
 }
 
-export default withStyles(styles)(Scream);
+export default withStyles(styles)(Post);
