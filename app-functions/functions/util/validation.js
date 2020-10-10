@@ -41,10 +41,10 @@ exports.validateLoginData = (data) => {
   };
 };
 
-exports.validateScreamBody = (data) => {
+exports.validatePostBody = (data) => {
   let errors = {};
 
-  if (isEmpty(data.body)) errors.screamBody = "Must not be empty";
+  if (isEmpty(data.body)) errors.postBody = "Must not be empty";
 
   return {
     errors,
