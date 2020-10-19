@@ -1,5 +1,6 @@
 let isEmpty = (string) => {
-  if (string.trim() === "") return true;
+  if (string === null) return true
+  else if (string.trim() === "") return true;
   else return false;
 };
 
@@ -33,6 +34,7 @@ exports.validateLoginData = (data) => {
   let errors = {};
 
   if (isEmpty(data.email)) errors.email = "Must not be empty";
+  else if (!isEmail(data.email)) errors.email = "Must be a valid email";
   if (isEmpty(data.password)) errors.password = "Must not be empty";
 
   return {
@@ -51,3 +53,14 @@ exports.validatePostBody = (data) => {
     valid: Object.keys(errors).length === 0 ? true : false,
   };
 };
+
+exports.validateUserDetails = (data) => {
+  let userDetails = {};
+  if (!isEmpty(data.bio)) userDetails.bio = data.bio;
+  if (!isEmpty(data.location)) userDetails.location = data.location;
+  if (!isEmpty(data.website)){
+    if (dat.website.trim().substring(0,4)==='http') {
+      
+    }
+  }
+}

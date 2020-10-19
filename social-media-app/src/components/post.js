@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-// import { Link } from '@material-ui/core';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime'
 import './post.css';
 
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -8,28 +9,27 @@ import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Collapse from '@material-ui/core/Collapse';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import { red } from '@material-ui/core/colors';
-import FavoriteIcon from '@material-ui/icons/Favorite';
-import ShareIcon from '@material-ui/icons/Share';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 const styles = {
     card: {
         marginBottom: 40,
     },
+    media: {
+        // height: 0,
+        // paddingTop: '56.25%', 
+        paddingTop: '100%',
+    },
 }
 
 class Post extends Component {
     render() {
+        dayjs.extend(relativeTime)
         let { classes } = this.props;
-        let {post} = this.props;
+        let { post } = this.props;
         // console.log(post)
         return (
             <Card classes={{ root: classes.card }}>
@@ -45,23 +45,23 @@ class Post extends Component {
                     title={
                         <Link
                             to={`/user/${post.userHandle}`}
-                            style={{fontWeight:'bold',color:'#009688'}}
+                            style={{ fontWeight: 'bold', color: '#009688' }}
                         >
                             {post.userHandle}
                         </Link>
                     }
-                    subheader={post.createdAt}
-                />
-                <CardMedia
-                    className={classes.media}
-                    image="/static/images/cards/paella.jpg"
-                    title="Paella dish"
+                    subheader={dayjs(post.createdAt).fromNow()}
                 />
                 <CardContent>
                     <Typography variant="body2" color="textSecondary" component="p">
                         {post.body}
                     </Typography>
                 </CardContent>
+                {post.postMedia && <CardMedia
+                    className={classes.media}
+                    image={post.postMedia}
+                    title={post.userHandle}
+                />}
             </Card>
         )
     }

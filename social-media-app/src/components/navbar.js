@@ -16,12 +16,12 @@ class Navbar extends Component {
                                 Home
                         </Button>
                         </NavLink>
-                        <NavLink activeClassName='activeNavLink' className='navLink' to='/signup'>
+                        <NavLink activeClassName='activeNavLink' className='navLink' to='/auth/signup'>
                             <Button color='inherit'>
                                 Sign Up
                         </Button>
                         </NavLink>
-                        <NavLink activeClassName='activeNavLink' className='navLink' to='/login'>
+                        <NavLink activeClassName='activeNavLink' className='navLink' to='/auth/login'>
                             <Button color='inherit'>
                                 Login
                         </Button>

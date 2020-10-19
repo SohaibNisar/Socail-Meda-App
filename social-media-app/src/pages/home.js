@@ -4,15 +4,17 @@ import Grid from '@material-ui/core/Grid';
 import Post from '../components/post';
 import './home.css';
 
-axios.defaults.baseURL = 'https://us-central1-socialmedia-76e8b.cloudfunctions.net/api';
-
 class Home extends Component {
-  state = { posts: null }
+  constructor(props) {
+    super()
+    this.state = {
+      posts: null,
+    }
+  }
 
   componentDidMount() {
     axios.get('/posts').then((res) => {
       this.setState({ posts: res.data })
-      console.log(this.state.posts)
     }).catch(error => {
       console.log(error)
     })
@@ -20,7 +22,7 @@ class Home extends Component {
 
   render() {
     return (
-      <Grid container justify="space-around" spacing={3}>
+      <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
           {this.state.posts ? this.state.posts.map(post => <Post post={post} key={post.postId} />) : 'Loading ...'}
         </Grid>

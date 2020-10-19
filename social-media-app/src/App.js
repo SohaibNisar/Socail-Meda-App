@@ -1,13 +1,20 @@
 import React from 'react';
-import './App.css';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import axios from 'axios';
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import jwtDecode from "jwt-decode";
 import Home from './pages/home';
-import Login from './pages/login';
+import Login from './pages/loginSignupTabs';
 import Navbar from './components/navbar';
-import {ThemeProvider} from '@material-ui/core/styles/';
+
+import { ThemeProvider } from '@material-ui/core/styles/';
 import CreateMuiTheme from '@material-ui/core/styles/createMuiTheme';
+
+import './App.css';
 // import { MuiThemeProvider from '@material-ui/core';
 // import teal from '@material-ui/core/colors/teal';
+
+axios.defaults.baseURL = 'https://us-central1-socialmedia-76e8b.cloudfunctions.net/api';
+
 
 let theme = CreateMuiTheme({
   palette: {
@@ -27,6 +34,19 @@ let theme = CreateMuiTheme({
   },
 })
 
+let authenticated;
+const token = localStorage.FBIdToken;
+if (token) {
+  const decodedToken = jwtDecode(token);
+  if (decodedToken.exp * 1000 > Date.now()) {
+    authenticated = true;
+  } else {
+    authenticated = false;
+  }
+} else {
+  authenticated = false;
+}
+
 let App = () => {
   return (
     <ThemeProvider theme={theme}>
@@ -35,10 +55,11 @@ let App = () => {
           <Navbar />
           <div className="container">
             <Switch>
-              <Route exact path="/" component={Home} />
-              <Route path="/login" component={Login} />
-              <Route path="/signup" component={Login} />
-              <Route path="/friends" component={Login} />
+              {/* <Redirect from='/auth' to='/auth/login' /> */}
+              <Route exact path="/" render={props => !authenticated ? < Redirect to='/auth/login' /> : <Home />} />
+              <Route path="/auth/:page?" render={props => <Login {...props} authenticated={authenticated} />} />
+              {/* <Route path="/signup" component={Login} /> */}
+              {/* <Route path="/friends" component={Login} /> */}
             </Switch>
           </div>
         </Router>

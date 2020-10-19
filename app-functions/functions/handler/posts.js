@@ -2,8 +2,6 @@ const Busboy = require("busboy");
 const { db, admin } = require("../util/admin");
 const { validatePostBody } = require("../util/validation");
 const { v4: uuidv4 } = require("uuid");
-const cors = require('cors');
-const corsHandler = cors({ origin: true });
 const crypto = require("crypto");
 const os = require("os");
 const fs = require("fs");
@@ -11,7 +9,6 @@ const path = require("path");
 
 
 exports.getAllPost = (req, res) => {
-  corsHandler(req, res, () => {
     db.collection("posts")
       .orderBy("createdAt", "desc")
       .get()
@@ -23,7 +20,8 @@ exports.getAllPost = (req, res) => {
             body: doc.data().body,
             userHandle: doc.data().userHandle,
             createdAt: doc.data().createdAt,
-            profilePicture: doc.data().profilePicture
+            profilePicture: doc.data().profilePicture,
+            postMedia: doc.data().postMedia,
           });
         });
         return res.status(200).json(posts);
@@ -35,7 +33,6 @@ exports.getAllPost = (req, res) => {
           errorCode: err.code
         });
       });
-  })
 };
 
 exports.uploadOnePost = (req, res) => {
@@ -45,7 +42,7 @@ exports.uploadOnePost = (req, res) => {
     userHandle: req.userData.userHandle,
     createdAt: new Date().toISOString(),
     profilePicture: req.userData.profilePictureUrl,
-    postMedia: ''
+    postMedia: null
   };
 
   let { errors, valid } = validatePostBody(newPost);
