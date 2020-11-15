@@ -40,9 +40,10 @@ class Navbar extends Component {
                                 Friends
                             </Button>
                         </NavLink>
-                        <Button className={!this.props.authenticated?classes.logoutButton:null} color='inherit'  variant="outlined" disabled={!this.props.authenticated} onClick={this.props.logout}>
-                            Logout
+                        <Button className={!this.props.authenticated ? classes.logoutButton : null} color='inherit' variant="outlined" disabled={!this.props.authenticated} onClick={this.props.logout}>
+                            logout
                         </Button>
+
                     </Toolbar>
                 </AppBar>
             </div>
