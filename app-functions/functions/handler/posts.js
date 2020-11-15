@@ -9,36 +9,30 @@ const path = require("path");
 
 
 exports.getAllPost = (req, res) => {
-    db.collection("posts")
-      .orderBy("createdAt", "desc")
-      .get()
-      .then(snapshot => {
-        let posts = [];
-        snapshot.forEach(doc => {
-          posts.push({
-            postId: doc.id,
-            body: doc.data().body,
-            userHandle: doc.data().userHandle,
-            createdAt: doc.data().createdAt,
-            profilePicture: doc.data().profilePicture,
-            postMedia: doc.data().postMedia,
-          });
-        });
-        return res.status(200).json(posts);
+  db.collection('posts')
+    .where('userHandle', 'in', ['Sohaib', 'Sohaib 3'])
+    .orderBy('createdAt', 'desc')
+    .get()
+    .then(snapshot => {
+      let posts = [];
+      snapshot.forEach(doc => {
+        posts.push(Object.assign(doc.data(), {id:doc.id}))
       })
-      .catch(err => {
-        return res.status(500).json({
-          message: "geting posts fail",
-          errMessage: err.message,
-          errorCode: err.code
-        });
+      return res.status(200).json(posts)
+    }).catch(err => {
+      return res.status(500).json({
+        message: "getting post fail",
+        errMessage: err.message,
+        errorCode: err.code,
+        err: err
       });
+    })
 };
 
 exports.uploadOnePost = (req, res) => {
   let newPost = {
     // body: req.body.body,
-    body: 'helo beautiful world',
+    body: `helo beautiful world ${req.userData.userHandle}`,
     userHandle: req.userData.userHandle,
     createdAt: new Date().toISOString(),
     profilePicture: req.userData.profilePictureUrl,

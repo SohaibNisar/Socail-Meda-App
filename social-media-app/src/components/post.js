@@ -30,7 +30,6 @@ class Post extends Component {
         dayjs.extend(relativeTime)
         let { classes } = this.props;
         let { post } = this.props;
-        // console.log(post)
         return (
             <Card classes={{ root: classes.card }}>
                 <CardHeader

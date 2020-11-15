@@ -10,6 +10,8 @@ import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
 import { Redirect } from 'react-router-dom';
 
+import {connect} from 'react-redux';
+
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.paper,
@@ -48,7 +50,7 @@ let FullWidthTabs = (props) => {
   const handleChangeIndex = (index) => {
     setValue(index);
   };
-  let authenticated = props.authenticated;
+  let authenticated = props.user.authenticated;
   return (
     authenticated ? <Redirect to='/' /> :
       <Grid container justify="space-around">
@@ -81,4 +83,9 @@ let FullWidthTabs = (props) => {
       </Grid>
   );
 }
-export default FullWidthTabs;
+
+const mapStateToProps = (state) => ({
+  user: state.user,
+})
+
+export default connect(mapStateToProps)(FullWidthTabs);

@@ -9,6 +9,10 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
+
+import { signupUser } from '../redux/actions/userActions';
+import { connect } from 'react-redux';
+
 const styles = {
     root: {
         textAlign: 'center',
@@ -39,8 +43,13 @@ class SignUpForm extends Component {
             password: null,
             confirmPassword: null,
             userHandle: null,
-            loading: false,
             errors: {}
+        }
+    }
+
+    componentWillReceiveProps(nextprops) {
+        if (nextprops.UI.errors) {
+            this.setState({ errors: nextprops.UI.errors })
         }
     }
 
@@ -57,20 +66,7 @@ class SignUpForm extends Component {
             userHandle: this.state.userHandle,
         }
 
-        axios.post('/Signup', newUserData)
-            .then((res) => {
-                localStorage.setItem('FBIdToken',`Bearer ${res.data.token}`);
-                this.setState({
-                    loading: true
-                })
-                this.props.history.push('/')
-            })
-            .catch(error => {
-                this.setState({
-                    errors: error.response.data,
-                    loading: false
-                })
-            })
+        this.props.signupUser(newUserData, this.props.history)
     }
 
     handleChange = (e) => {
@@ -80,7 +76,7 @@ class SignUpForm extends Component {
     }
 
     render() {
-        let { classes } = this.props;
+        let { classes ,UI:{loading}} = this.props;
         return (
             <div className={classes.root}>
                 <Typography variant='h5'>Signup</Typography>
@@ -148,11 +144,11 @@ class SignUpForm extends Component {
                                 type='submit'
                                 variant='outlined'
                                 color='primary'
-                                disabled={this.state.loading && true}
+                                disabled={loading && true}
                                 className={classes.button}
                             >
                                 Signup
-                                {this.state.loading && (
+                                {loading && (
                                     <CircularProgress className={classes.circularProgress} size={25} />
                                 )}
                             </Button>
@@ -171,4 +167,14 @@ class SignUpForm extends Component {
     }
 }
 
-export default withStyles(styles)(withRouter(SignUpForm));
+
+
+const mapStateToProps = (state) => ({
+    UI: state.UI
+})
+
+const mapActionsToProps = {
+    signupUser
+}
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(withRouter(SignUpForm)));
+

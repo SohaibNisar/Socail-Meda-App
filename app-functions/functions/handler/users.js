@@ -8,7 +8,20 @@ const fs = require("fs");
 const path = require("path");
 
 exports.addUserDetails = (req, res) => {
+  console.log(req.body)
   let userDetails = validateUserDetails(req.body);
+  db.collection('users').doc(`${req.userData.userHandle}`).update(userDetails).then((snapshot) => {
+    return res.status(200).json({
+      message: `user details added successfully`
+    });
+  }).catch((err) => {
+    return res.status(500).json({
+      message: "adding user details fail",
+      errMessage: err.message,
+      errorCode: err.code,
+      error:err
+    });
+  })
 }
 
 exports.uploadImage = (req, res) => {

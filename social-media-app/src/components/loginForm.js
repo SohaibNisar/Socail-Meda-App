@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { withRouter, Link } from "react-router-dom";
-import axios from 'axios';
 
 import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
@@ -8,6 +7,9 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
+
+import { loginUser } from '../redux/actions/userActions';
+import { connect } from 'react-redux';
 
 const styles = {
     root: {
@@ -43,31 +45,20 @@ class LoginForm extends Component {
         }
     }
 
+    componentWillReceiveProps(nextprops) {
+        if (nextprops.UI.errors) {
+            this.setState({ errors: nextprops.UI.errors })
+        }
+    }
+
     handleSubmit = (e) => {
         e.preventDefault();
-        this.setState({
-            loading: true
-        })
-
         const userData = {
             email: this.state.email,
             password: this.state.password,
         }
 
-        axios.post('/login', userData)
-            .then((res) => {
-                localStorage.setItem('FBIdToken',`Bearer ${res.data.token}`);
-                this.setState({
-                    loading: true
-                })
-                this.props.history.push('/')
-            })
-            .catch(error => {
-                this.setState({
-                    errors: error.response.data,
-                    loading: false
-                })
-            })
+        this.props.loginUser(userData, this.props.history)
     }
 
     handleChange = (e) => {
@@ -77,7 +68,7 @@ class LoginForm extends Component {
     }
 
     render() {
-        let { classes } = this.props;
+        let { classes, UI: { loading } } = this.props;
         return (
             <div className={classes.root}>
                 <Typography variant='h5'>Login</Typography>
@@ -123,11 +114,11 @@ class LoginForm extends Component {
                                 type='submit'
                                 variant='outlined'
                                 color='primary'
-                                disabled={this.state.loading && true}
+                                disabled={loading}
                                 className={classes.button}
                             >
                                 Login
-                                {this.state.loading && (
+                                {loading && (
                                     <CircularProgress className={classes.circularProgress} size={25} />
                                 )}
                             </Button>
@@ -146,4 +137,11 @@ class LoginForm extends Component {
     }
 }
 
-export default withStyles(styles)(withRouter(LoginForm));
+const mapStateToProps = (state) => ({
+    UI: state.UI
+})
+
+const mapActionsToProps = {
+    loginUser
+}
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(withRouter(LoginForm)));

@@ -58,9 +58,14 @@ exports.validateUserDetails = (data) => {
   let userDetails = {};
   if (!isEmpty(data.bio)) userDetails.bio = data.bio;
   if (!isEmpty(data.location)) userDetails.location = data.location;
-  if (!isEmpty(data.website)){
-    if (dat.website.trim().substring(0,4)==='http') {
-      
+  if (!isEmpty(data.website)) {
+    if (data.website.trim().substring(0, 4) !== 'http') {
+      userDetails.website = `http://${data.website}`
+      console.log(userDetails.website)
+    } else {
+      userDetails.website = data.website;
     }
   }
+
+  return userDetails;
 }

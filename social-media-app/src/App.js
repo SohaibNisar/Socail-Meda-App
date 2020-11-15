@@ -3,11 +3,17 @@ import axios from 'axios';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import jwtDecode from "jwt-decode";
 import Home from './pages/home';
+import Friends from './pages/friends';
 import Login from './pages/loginSignupTabs';
 import Navbar from './components/navbar';
 
 import { ThemeProvider } from '@material-ui/core/styles/';
 import CreateMuiTheme from '@material-ui/core/styles/createMuiTheme';
+
+import store from './redux/store';
+import { connect } from 'react-redux'
+import { SET_AUTHENTICATED } from './redux/types';
+import { logout } from './redux/actions/userActions';
 
 import './App.css';
 // import { MuiThemeProvider from '@material-ui/core';
@@ -34,32 +40,31 @@ let theme = CreateMuiTheme({
   },
 })
 
-let authenticated;
 const token = localStorage.FBIdToken;
 if (token) {
   const decodedToken = jwtDecode(token);
   if (decodedToken.exp * 1000 > Date.now()) {
-    authenticated = true;
+    store.dispatch({ type: SET_AUTHENTICATED });
   } else {
-    authenticated = false;
+    logout()
+    // store.dispatch({ type: SET_UNAUTHENTICATED });
   }
 } else {
-  authenticated = false;
+  logout()
+  // store.dispatch({ type: SET_UNAUTHENTICATED });
 }
 
-let App = () => {
+let App = (props) => {
   return (
     <ThemeProvider theme={theme}>
       <div>
         <Router>
-          <Navbar />
+          <Navbar authenticated={props.user.authenticated} logout={props.logout} />
           <div className="container">
             <Switch>
-              {/* <Redirect from='/auth' to='/auth/login' /> */}
-              <Route exact path="/" render={props => !authenticated ? < Redirect to='/auth/login' /> : <Home />} />
-              <Route path="/auth/:page?" render={props => <Login {...props} authenticated={authenticated} />} />
-              {/* <Route path="/signup" component={Login} /> */}
-              {/* <Route path="/friends" component={Login} /> */}
+              <Route exact path="/" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Home />} />
+              <Route path="/auth/:page?" render={props => <Login {...props} />} />
+              <Route path="/friends" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Friends />} />
             </Switch>
           </div>
         </Router>
@@ -68,4 +73,11 @@ let App = () => {
   )
 }
 
-export default App;
+const mapStateToProps = (state) => ({
+  user: state.user
+})
+
+const mapActionsToProps = {
+  logout
+}
+export default connect(mapStateToProps, mapActionsToProps)(App);
