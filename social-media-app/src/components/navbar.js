@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
+import { NavLink } from 'react-router-dom';
+import './navbar.css';
+
+// mui
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Button } from '@material-ui/core';
-import { NavLink } from 'react-router-dom';
-import './navbar.css';
 
 const styles = {
     logoutButton: {
@@ -15,7 +17,7 @@ const styles = {
 
 class Navbar extends Component {
     render() {
-        let { classes } = this.props;
+        // let { classes } = this.props;
         return (
             <div>
                 <AppBar>
@@ -25,7 +27,7 @@ class Navbar extends Component {
                                 Home
                             </Button>
                         </NavLink>
-                        <NavLink activeClassName='activeNavLink' className='navLink' to='/auth/login'>
+                        {/* <NavLink activeClassName='activeNavLink' className='navLink' to='/auth/login'>
                             <Button color='inherit'>
                                 Login
                             </Button>
@@ -34,13 +36,13 @@ class Navbar extends Component {
                             <Button color='inherit'>
                                 Sign Up
                             </Button>
-                        </NavLink>
+                        </NavLink> */}
                         <NavLink activeClassName='activeNavLink' className='navLink' to='/friends'>
                             <Button color='inherit'>
                                 Friends
                             </Button>
                         </NavLink>
-                        <Button className={!this.props.authenticated ? classes.logoutButton : null} color='inherit' variant="outlined" disabled={!this.props.authenticated} onClick={this.props.logout}>
+                        <Button color='inherit' variant="outlined" onClick={this.props.logout}>
                             logout
                         </Button>
 

@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'
 import './post.css';
 
+// mui
 import withStyles from '@material-ui/core/styles/withStyles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -21,7 +22,10 @@ const styles = {
     media: {
         // height: 0,
         // paddingTop: '56.25%', 
-        paddingTop: '100%',
+        // paddingTop: '100%',
+        width:'unset',
+        maxWidth:'100%',
+        margin:'0 auto 20px auto',
     },
 }
 
@@ -57,6 +61,7 @@ class Post extends Component {
                     </Typography>
                 </CardContent>
                 {post.postMedia && <CardMedia
+                    component="img"
                     className={classes.media}
                     image={post.postMedia}
                     title={post.userHandle}

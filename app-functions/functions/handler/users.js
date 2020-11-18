@@ -7,6 +7,10 @@ const os = require("os");
 const fs = require("fs");
 const path = require("path");
 
+exports.getUserData = (req, res) => {
+  return res.json(req.userData)
+}
+
 exports.addUserDetails = (req, res) => {
   console.log(req.body)
   let userDetails = validateUserDetails(req.body);
@@ -19,7 +23,7 @@ exports.addUserDetails = (req, res) => {
       message: "adding user details fail",
       errMessage: err.message,
       errorCode: err.code,
-      error:err
+      error: err
     });
   })
 }

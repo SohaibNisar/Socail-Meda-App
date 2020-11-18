@@ -10,13 +10,13 @@ const path = require("path");
 
 exports.getAllPost = (req, res) => {
   db.collection('posts')
-    .where('userHandle', 'in', ['Sohaib', 'Sohaib 3'])
+    .where('userHandle', 'in', req.userData.friends)
     .orderBy('createdAt', 'desc')
     .get()
     .then(snapshot => {
       let posts = [];
       snapshot.forEach(doc => {
-        posts.push(Object.assign(doc.data(), {id:doc.id}))
+        posts.push(Object.assign(doc.data(), { id: doc.id }))
       })
       return res.status(200).json(posts)
     }).catch(err => {
@@ -36,7 +36,9 @@ exports.uploadOnePost = (req, res) => {
     userHandle: req.userData.userHandle,
     createdAt: new Date().toISOString(),
     profilePicture: req.userData.profilePictureUrl,
-    postMedia: null
+    postMedia: null,
+    likesCount: 0,
+    commentsCount: 0,
   };
 
   let { errors, valid } = validatePostBody(newPost);
@@ -93,7 +95,8 @@ exports.uploadOnePost = (req, res) => {
               return res.status(500).json({
                 message: "adding post fail",
                 errMessage: err.message,
-                errorCode: err.code
+                errorCode: err.code,
+                err
               });
             });
         })
@@ -101,7 +104,8 @@ exports.uploadOnePost = (req, res) => {
           return res.status(500).json({
             message: "uploading post media to storage fail",
             errMessage: err.message,
-            errorCode: err.code
+            errorCode: err.code,
+            err
           });
         });
     } else {
@@ -116,10 +120,180 @@ exports.uploadOnePost = (req, res) => {
           return res.status(500).json({
             message: "adding post fail",
             errMessage: err.message,
-            errorCode: err.code
+            errorCode: err.code,
+            err
           });
         });
     }
   });
   busboy.end(req.rawBody);
 };
+
+exports.commentPost = (req, res) => {
+  if (req.body.body.trim() == '' || req.body.body == null) res.status(400).json({ error: 'Must not be empty' })
+  
+  const postId = req.params.postId;
+
+  const newComment = {
+    body: req.body.body,
+    createdAt: new Date().toISOString(),
+    userHandle: req.userData.userHandle,
+    profilePictureUrl: req.userData.profilePictureUrl,
+    postId: postId,
+  }
+
+  db.doc(`posts/${postId}`).get().then((doc) => {
+    if (!doc.exists) {
+      res.status(400).json({ message: 'post not found' })
+    } else {
+      db.collection('comments')
+        .add(newComment).then(() => {
+          return db.doc(`posts/${postId}`).update({
+            commentsCount: admin.firestore.FieldValue.increment(1)
+          })
+        }).then(() => {
+          res.status(200).json('comment added')
+        }).catch(err => {
+          return res.status(500).json({
+            message: "adding comment fail",
+            errMessage: err.message,
+            errorCode: err.code,
+            err: err
+          });
+        })
+    }
+  }).catch(err => {
+    return res.status(500).json({
+      message: "checking post fail",
+      errMessage: err.message,
+      errorCode: err.code,
+      err: err
+    });
+  })
+}
+
+exports.getComments = (req, res) => {
+  db.collection('comments')
+    .where('userHandle', '==', req.userData.userHandle)
+    .orderBy('createdAt', 'desc')
+    .get()
+    .then(snapshot => {
+      let comments = [];
+      snapshot.forEach(doc => [
+        comments.push({ id: doc.id, ...doc.data() })
+      ])
+      res.json(comments)
+    }).catch(err => {
+      return res.status(500).json({
+        message: "getting comment fail",
+        errMessage: err.message,
+        errorCode: err.code,
+        err: err
+      });
+    })
+}
+
+exports.likePost = (req, res) => {
+  let postId = req.params.postId;
+  let userHandle = req.userData.userHandle;
+
+  db.doc(`posts/${postId}`).get()
+    .then(doc => {
+      if (!doc.exists) {
+        res.status(400).json({ err: 'post not found' })
+      } else {
+        db.collection('likes')
+          .where('userHandle', '==', userHandle)
+          .where('postId', '==', postId).get()
+          .then(snapshot => {
+            if (!snapshot.empty) {
+              res.json({ mesage: 'already liked' })
+            } else {
+              db.collection('likes').add({
+                postId: postId,
+                userHandle: userHandle,
+              }).then(() => {
+                return db.doc(`posts/${postId}`).update({
+                  likesCount: admin.firestore.FieldValue.increment(1),
+                })
+              }).then(() => {
+                res.json({ message: 'post liked' })
+              }).catch(err => {
+                return res.status(500).json({
+                  message: "adding like fail",
+                  errMessage: err.message,
+                  errorCode: err.code,
+                  err: err
+                });
+              })
+            }
+          }).catch(err => {
+            return res.status(500).json({
+              message: "checking for like doc fail",
+              errMessage: err.message,
+              errorCode: err.code,
+              err: err
+            });
+          })
+      }
+    }).catch(err => {
+      return res.status(500).json({
+        message: "checking for post to be liked fail",
+        errMessage: err.message,
+        errorCode: err.code,
+        err: err
+      });
+    })
+}
+
+exports.unlikePost = (req, res) => {
+  let postId = req.params.postId;
+  let userHandle = req.userData.userHandle;
+
+  db.doc(`posts/${postId}`).get()
+    .then(doc => {
+      if (!doc.exists) {
+        res.status(400).json({ err: 'post not found' })
+      } else {
+        db.collection('likes')
+          .where('userHandle', '==', userHandle)
+          .where('postId', '==', postId).limit(0).get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+              res.json({ mesage: 'already not liked' })
+            } else {
+              db.collection('likes').doc(snapshot.docs[0].id).delete()
+                .then(() => {
+                  return db.doc(`posts/${postId}`).update({
+                    likesCount: admin.firestore.FieldValue.increment(-1),
+                  })
+                }).then(() => {
+                  res.json({ message: 'post unliked' })
+                }).catch(err => {
+                  return res.status(500).json({
+                    message: "unlikng post fail",
+                    errMessage: err.message,
+                    errorCode: err.code,
+                    err: err
+                  });
+                })
+
+            }
+          }).catch(err => {
+            return res.status(500).json({
+              message: "checking for unlike doc fail",
+              errMessage: err.message,
+              errorCode: err.code,
+              err: err
+            });
+          })
+      }
+    }).catch(err => {
+      return res.status(500).json({
+        message: "checking for post to be unliked fail",
+        errMessage: err.message,
+        errorCode: err.code,
+        err: err
+      });
+    })
+}
