@@ -1,5 +1,5 @@
 const functions = require("firebase-functions");
-const { getAllPost, uploadOnePost,commentPost,getComments,likePost,unlikePost } = require("./handler/posts");
+const { getAllPost, uploadOnePost,commentPost,getComments,likePost,unlikePost,deletePost } = require("./handler/posts");
 const { signup, login, } = require("./handler/auth");
 const { getUserData, uploadImage, addUserDetails } = require("./handler/users");
 const { FBAuth } = require("./util/fbAuth");
@@ -12,7 +12,7 @@ app.use(cors({ origin: true }));
 
 app.get("/posts", FBAuth, getAllPost);
 app.get("/authenticUser", FBAuth, getUserData);
-app.get("/post/get/comments", FBAuth, getComments);
+app.get("/post/:postId/comments", FBAuth, getComments);
 
 app.post("/posts", [checkImage, FBAuth], uploadOnePost);
 app.post("/signup", signup);
@@ -22,5 +22,6 @@ app.post("/user/addUserDetails", FBAuth, addUserDetails);
 app.post("/post/:postId/comment", FBAuth, commentPost);
 app.post("/post/:postId/like", FBAuth, likePost);
 app.post("/post/:postId/unlike", FBAuth, unlikePost);
+app.delete("/post/:postId", FBAuth, deletePost);
 
 exports.api = functions.https.onRequest(app);

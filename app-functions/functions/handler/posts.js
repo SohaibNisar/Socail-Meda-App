@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
+const { query } = require("express");
 
 
 exports.getAllPost = (req, res) => {
@@ -131,7 +132,7 @@ exports.uploadOnePost = (req, res) => {
 
 exports.commentPost = (req, res) => {
   if (req.body.body.trim() == '' || req.body.body == null) res.status(400).json({ error: 'Must not be empty' })
-  
+
   const postId = req.params.postId;
 
   const newComment = {
@@ -174,7 +175,7 @@ exports.commentPost = (req, res) => {
 
 exports.getComments = (req, res) => {
   db.collection('comments')
-    .where('userHandle', '==', req.userData.userHandle)
+    .where('postId', '==', req.params.postId)
     .orderBy('createdAt', 'desc')
     .get()
     .then(snapshot => {
@@ -253,7 +254,7 @@ exports.unlikePost = (req, res) => {
   db.doc(`posts/${postId}`).get()
     .then(doc => {
       if (!doc.exists) {
-        res.status(400).json({ err: 'post not found' })
+        res.status(403).json({ err: 'post not found' })
       } else {
         db.collection('likes')
           .where('userHandle', '==', userHandle)
@@ -296,4 +297,62 @@ exports.unlikePost = (req, res) => {
         err: err
       });
     })
+}
+
+exports.deletePost = (req, res) => {
+  const batch = db.batch();
+  let postId = req.params.postId;
+
+  db.doc(`posts/${postId}`).get().then(doc => {
+    if (!doc.exists) {
+      res.status(404).json({ message: 'post not found' })
+    } else {
+      db.collection('comments').where('postId', '==', postId).get().then(querySnapshot => {
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach(doc => {
+            batch.delete(db.doc(`comments/${doc.id}`))
+          })
+          db.doc(`posts/${postId}`).delete()
+            .then(() => {
+              return batch.commit()
+            })
+            .then(() => {
+              res.json({ message: 'post deleted successfully' })
+            }).catch(err => {
+              res.status(500).json({
+                message: 'deleting post failed',
+                errMessage: err.message,
+                errCode: err.code,
+                err
+              })
+            })
+        } else {
+          db.doc(`posts/${postId}`).delete().then(() => {
+            res.json({ message: 'post deleted successfully' })
+          }).catch(err => {
+            res.status(500).json({
+              message: 'deleting post failed',
+              errMessage: err.message,
+              errCode: err.code,
+              err
+            })
+          })
+        }
+      }).catch(err => {
+        res.status(500).json({
+          message: 'checking comments to be deleted failed',
+          errMessage: err.message,
+          errCode: err.code,
+          err
+        })
+      })
+    }
+  }).catch(err => {
+    res.status(500).json({
+      message: 'checking for post to be deleted failed',
+      errMessage: eerr.message,
+      errCode: err.code,
+      err
+    })
+  })
 }
