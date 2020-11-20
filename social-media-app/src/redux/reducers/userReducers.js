@@ -3,7 +3,8 @@ import axios from 'axios'
 
 const initialState = {
     authenticated: false,
-    credential: null
+    credential: null,
+    notifications: null,
 }
 
 export default function (state = initialState, action) {
@@ -12,7 +13,7 @@ export default function (state = initialState, action) {
             return {
                 // ...state,
                 authenticated: true,
-                credential: action.payload
+                ...action.payload,
             }
         case SET_AUTHENTICATED:
             axios.defaults.headers.common['Authorization'] = localStorage.FBIdToken;

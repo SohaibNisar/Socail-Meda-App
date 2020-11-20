@@ -32,6 +32,7 @@ exports.signup = (req, res) => {
                     .then(usersnapshot => {
                         let newUserDatabaseCredentials = {
                             email: newUser.email,
+                            friends: [newUser.userHandle],
                             userHandle: newUser.userHandle,
                             createdAt: new Date().toISOString(),
                             userId: usersnapshot.user.uid,

@@ -7,12 +7,43 @@ const os = require("os");
 const fs = require("fs");
 const path = require("path");
 
+exports.getAuthenticUserData = (req, res) => {
+  db.collection('notifications')
+    .where('postUserHandle', '==', req.userData.userHandle)
+    .orderBy('createdAt', 'desc')
+    .limit(10).get().then(querySnapshot => {
+      let notifications = [];
+      querySnapshot.forEach(doc => {
+        notifications.push({ ...doc.data(), notificationId: doc.id })
+      })
+      return res.json({ notifications, credentials: req.userData })
+    }).catch(err => res.status(500).json({ errorMessage: err.message, errorCode: err.code, err }))
+}
+
 exports.getUserData = (req, res) => {
-  return res.json(req.userData)
+  const userHandle = req.params.userHandle;
+  let userData = {};
+  db.doc(`users/${userHandle}`).get()
+    .then(doc => {
+      if (!doc.exists) {
+        return res.status(404).json({ message: 'no such user found' })
+      } else {
+        userData.credentials = doc.data();
+        return db.collection('posts').where('userHandle', '==', userHandle).get()
+      }
+    })
+    .then((querySnapshot) => {
+      userData.posts = [];
+      querySnapshot.forEach(doc => {
+        userData.posts.push({ ...doc.data(), postId: doc.id })
+      });
+      return res.json(userData)
+    })
+    .catch(err => { res.json({ errMessage: err.message, err }) })
 }
 
 exports.addUserDetails = (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   let userDetails = validateUserDetails(req.body);
   db.collection('users').doc(`${req.userData.userHandle}`).update(userDetails).then((snapshot) => {
     return res.status(200).json({
@@ -68,7 +99,7 @@ exports.uploadImage = (req, res) => {
           .doc(req.userData.userHandle)
           .update({ profilePictureUrl })
           .then(() => {
-            console.log(profilePictureUrl);
+            // console.log(profilePictureUrl);
             return res.json({ message: "image successfuly uploaded" });
           })
           .catch(err => {
@@ -90,3 +121,25 @@ exports.uploadImage = (req, res) => {
   });
   busboy.end(req.rawBody);
 };
+
+exports.markNotificationRead = (req, res) => {
+  let userHandle = req.userData.userHandle;
+  let batch = db.batch();
+  db.collection('notifications')
+    .where('postUserHandle', '==', userHandle)
+    .where('read', '==', false)
+    .get()
+    .then(querySnapshot => {
+      if (querySnapshot.empty) {
+        res.status(404).json({ message: 'no notification found' })
+      } else {
+        querySnapshot.forEach(doc => {
+          batch.update(db.doc(`notifications/${doc.id}`), { read: true })
+        })
+        batch.commit().then(() => {
+          res.json({ message: 'notification marked read' })
+        }).catch(err => { res.status(500).json({ errMessage: err.message, err }) });
+      }
+    })
+    .catch(err => { res.status(500).json({ errMessage: err.message, err }) })
+}

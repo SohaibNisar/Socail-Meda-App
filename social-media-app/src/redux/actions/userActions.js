@@ -54,7 +54,7 @@ export const signupUser = (newUserData, history) => (dispatch) => {
 }
 
 export const getUserData = () => (dispatch) => {
-    axios.get('/user').then(res => {
+    axios.get('/authenticUser').then(res => {
         dispatch({
             type: SET_USER,
             payload: res.data

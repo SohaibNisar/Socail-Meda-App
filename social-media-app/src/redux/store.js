@@ -13,8 +13,15 @@ const reducers = combineReducers({
     user: userReducers,
 });
 
+const rootReducer = (state, action) => {
+    if (action.type === 'SET_UNAUTHENTICATED') {
+        state = undefined
+    }
+    return reducers(state, action)
+}
+
 const store = createStore(
-    reducers,
+    rootReducer,
     initialState,
     compose(
         applyMiddleware(thunk),

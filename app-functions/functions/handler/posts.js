@@ -6,28 +6,48 @@ const crypto = require("crypto");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
-const { query } = require("express");
+// const { query } = require("express");
 
 
 exports.getAllPost = (req, res) => {
-  db.collection('posts')
-    .where('userHandle', 'in', req.userData.friends)
-    .orderBy('createdAt', 'desc')
-    .get()
-    .then(snapshot => {
-      let posts = [];
-      snapshot.forEach(doc => {
-        posts.push(Object.assign(doc.data(), { id: doc.id }))
-      })
-      return res.status(200).json(posts)
-    }).catch(err => {
-      return res.status(500).json({
-        message: "getting post fail",
-        errMessage: err.message,
-        errorCode: err.code,
-        err: err
-      });
+  let friends = req.userData.friends;
+  if (friends == undefined || friends == null) {
+    return res.status(200).json({
+      message: 'nothing to show no friends',
+      code: 'friends'
     })
+  } else if (friends.length > 0) {
+    db.collection('posts')
+      .where('userHandle', 'in', req.userData.friends)
+      .orderBy('createdAt', 'desc')
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          return res.status(200).json({
+            message: 'nothing to show',
+            code: 'nothing'
+          })
+        } else {
+          let posts = [];
+          snapshot.forEach(doc => {
+            posts.push(Object.assign(doc.data(), { id: doc.id }))
+          })
+          return res.status(200).json(posts)
+        }
+      }).catch(err => {
+        return res.status(500).json({
+          message: "getting post fail",
+          errMessage: err.message,
+          errorCode: err.code,
+          err: err
+        });
+      })
+  } else {
+    return res.status(200).json({
+      message: 'something went wrong',
+      code: 'error'
+    })
+  }
 };
 
 exports.uploadOnePost = (req, res) => {
@@ -148,7 +168,10 @@ exports.commentPost = (req, res) => {
       res.status(400).json({ message: 'post not found' })
     } else {
       db.collection('comments')
-        .add(newComment).then(() => {
+        .add({
+          ...newComment,
+          postUserHandle: doc.data().userHandle
+        }).then(() => {
           return db.doc(`posts/${postId}`).update({
             commentsCount: admin.firestore.FieldValue.increment(1)
           })
@@ -212,6 +235,7 @@ exports.likePost = (req, res) => {
             } else {
               db.collection('likes').add({
                 postId: postId,
+                postUserHandle: doc.data().userHandle,
                 userHandle: userHandle,
               }).then(() => {
                 return db.doc(`posts/${postId}`).update({

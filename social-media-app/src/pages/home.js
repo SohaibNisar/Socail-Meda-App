@@ -19,7 +19,14 @@ class Home extends Component {
     return (
       <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
-          {posts ? posts.map(post => <Post post={post} key={post.id} />) : 'Loading ...'}
+          {
+            posts ? posts.message ?
+              <div>
+                {posts.message}
+              </div>
+              : posts.map(post => <Post post={post} key={post.id} />)
+              : 'Loading ...'
+          }
         </Grid>
         <Grid item sm={4} md={4} className='friend-container' >
           Friends
