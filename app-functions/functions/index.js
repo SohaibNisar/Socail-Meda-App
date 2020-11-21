@@ -103,45 +103,99 @@ exports.createCommentNotification = functions.firestore.document('comments/{docI
 })
 
 exports.userImageUpdate = functions.firestore.document('users/{userHandle}').onUpdate((change, context) => {
-    return console.log(context.params.userHandle)
-    // let beforeData = change.before.data();
-    // let afterData = change.after.data();
-    // if (beforeData.profilePictureUrl != afterData.profilePictureUrl) {
-    //     let imageName = beforeData.profilePictureUrl.slice(76, 115)
-    //     let batch = db.batch();
-    //     return db.collection('posts')
-    //         .where('userHandle', '==', context.params.userHandle)
-    //         .get().then(querySnapshot => {
-    //             querySnapshot.forEach(doc => {
-    //                 let postDocRef = db.doc(`posts/${doc.id}`)
-    //                 batch.update(postDocRef, { profilePicture: afterData.profilePictureUrl })
-    //             })
-    //             return db.collection('comments').where('userHandle', '==', context.params.userHandle).get()
-    //         }).then(querySnapshot => {
-    //             querySnapshot.forEach(doc => {
-    //                 let commentDocRef = db.doc(`comments/${doc.id}`)
-    //                 batch.update(commentDocRef, { profilePicture: afterData.profilePictureUrl })
-    //             })
-    //             if (imageName == 'no-profile-picture.png') {
-    //                 return true
-    //             } else {
-    //                 return admin.storage().bucket().file(imageName).delete()
-    //             }
-    //         }).then(() => {
-    //             return batch.commit()
-    //         }).then(() => {
-    //             console.log('post images updated')
-    //             console.log('comment images updated')
-    //             console.log('image deleted')
-    //         }).catch(err => { console.log(err.message, err) })
-    // } else {
-    //     console.log('same image url');
-    //     return true;
-    // }
+    let beforeData = change.before.data();
+    let afterData = change.after.data();
+    if (beforeData.profilePictureUrl != afterData.profilePictureUrl) {
+        let imageName = beforeData.profilePictureUrl.slice(76, 115);
+        let batch = db.batch();
+        return db.collection('posts')
+            .where('userHandle', '==', context.params.userHandle)
+            .get().then(querySnapshot => {
+                if (querySnapshot.empty) {
+                    console.log('no posts')
+                    return db.collection('comments').where('userHandle', '==', context.params.userHandle).get()
+                } else {
+                    querySnapshot.forEach(doc => {
+                        let postDocRef = db.doc(`posts/${doc.id}`)
+                        batch.update(postDocRef, { profilePicture: afterData.profilePictureUrl })
+                    })
+                    return db.collection('comments').where('userHandle', '==', context.params.userHandle).get()
+                }
+            }).then(querySnapshot => {
+                if (querySnapshot.empty) {
+                    console.log('no comments')
+                } else {
+                    querySnapshot.forEach(doc => {
+                        let commentDocRef = db.doc(`comments/${doc.id}`)
+                        batch.update(commentDocRef, { profilePicture: afterData.profilePictureUrl })
+                    })
+                }
+                if (imageName == 'no-profile-picture.png') {
+                    console.log('default image')
+                    return true
+                } else {
+                    return admin.storage().bucket().file(imageName).delete()
+                }
+            }).then(() => {
+                return batch.commit()
+            }).then(() => {
+                console.log('post images updated')
+                console.log('comment images updated')
+                console.log('image deleted')
+            }).catch(err => { console.log(err.message, err) })
+    } else {
+        console.log('same image url');
+        return true;
+    }
 })
 
-exports.postDelete = functions.firestore.document('posts/{postId}').onDelete(snapshot => {
-
+exports.postDelete = functions.firestore.document('posts/{postId}').onDelete((snapshot, context) => {
+    const postId = context.params.postId;
+    const batch = db.batch();
+    const postMedia = snapshot.data().postMedia;
+    return db.collection('comments')
+        .where('postId', '==', postId).get()
+        .then(querySnapshot => {
+            if (!querySnapshot.empty) {
+                querySnapshot.forEach(doc => {
+                    batch.delete(db.doc(`comments/${doc.id}`))
+                })
+            } else {
+                console.log('no comments')
+            }
+            return db.collection('notifications').where('postId', '==', postId).get()
+        }).then(querySnapshot => {
+            if (!querySnapshot.empty) {
+                querySnapshot.forEach(doc => {
+                    batch.delete(db.doc(`notifications/${doc.id}`))
+                })
+            } else {
+                console.log('no notifications')
+            }
+            return db.collection('likes').where('postId', '==', postId).get()
+        }).then(querySnapshot => {
+            if (!querySnapshot.empty) {
+                querySnapshot.forEach(doc => {
+                    batch.delete(db.doc(`likes/${doc.id}`))
+                })
+            } else {
+                console.log('no likes')
+            }
+            if (postMedia) {
+                let imageName = postMedia.slice(76, 115);
+                return admin.storage().bucket().file(imageName).delete()
+            } else {
+                console.log('no post media')
+                return true
+            }
+        }).then(() => {
+            return batch.commit()
+        }).then(() => {
+            console.log('post data deleted')
+        }).catch(err => {
+            console.log(err.message)
+            console.log(err)
+        })
 })
 
 

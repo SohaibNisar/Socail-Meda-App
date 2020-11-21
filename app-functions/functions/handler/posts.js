@@ -324,34 +324,14 @@ exports.unlikePost = (req, res) => {
 }
 
 exports.deletePost = (req, res) => {
-  const batch = db.batch();
   let postId = req.params.postId;
-
   db.doc(`posts/${postId}`).get().then(doc => {
     if (!doc.exists) {
       res.status(404).json({ message: 'post not found' })
     } else {
-      db.collection('comments').where('postId', '==', postId).get().then(querySnapshot => {
-        if (!querySnapshot.empty) {
-          querySnapshot.forEach(doc => {
-            batch.delete(db.doc(`comments/${doc.id}`))
-          })
-          db.doc(`posts/${postId}`).delete()
-            .then(() => {
-              return batch.commit()
-            })
-            .then(() => {
-              res.json({ message: 'post deleted successfully' })
-            }).catch(err => {
-              res.status(500).json({
-                message: 'deleting post failed',
-                errMessage: err.message,
-                errCode: err.code,
-                err
-              })
-            })
-        } else {
-          db.doc(`posts/${postId}`).delete().then(() => {
+      if (req.userData.userHandle === doc.data().userHandle) {
+        db.doc(`posts/${postId}`).delete()
+          .then(() => {
             res.json({ message: 'post deleted successfully' })
           }).catch(err => {
             res.status(500).json({
@@ -361,15 +341,12 @@ exports.deletePost = (req, res) => {
               err
             })
           })
-        }
-      }).catch(err => {
-        res.status(500).json({
-          message: 'checking comments to be deleted failed',
-          errMessage: err.message,
-          errCode: err.code,
-          err
+      } else {
+        res.status(405).json({
+          message: 'deleting post failed',
+          errMessage: 'can not delete others post'
         })
-      })
+      }
     }
   }).catch(err => {
     res.status(500).json({
