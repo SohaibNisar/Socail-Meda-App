@@ -6,42 +6,51 @@ const crypto = require("crypto");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
-// const { query } = require("express");
-
 
 exports.getAllPost = (req, res) => {
   let friends = req.userData.friends;
   if (friends == undefined || friends == null) {
     return res.status(200).json({
-      message: 'nothing to show no friends',
-      code: 'friends'
+      other:{
+        message: 'nothing to show no friends',
+        code: 'friends'
+      }
     })
   } else if (friends.length > 0) {
-    db.collection('posts')
-      .where('userHandle', 'in', req.userData.friends)
-      .orderBy('createdAt', 'desc')
-      .get()
-      .then(snapshot => {
-        if (snapshot.empty) {
-          return res.status(200).json({
-            message: 'nothing to show',
-            code: 'nothing'
+    let promises = [];
+    friends.forEach(friend => {
+      let p = db.collection('posts').where('userHandle', '==', friend).get();
+      promises.push(p);
+    })
+
+    Promise.all(promises).then(snapshot => {
+      let posts = [];
+      snapshot.forEach(docs => {
+        if (!docs.empty) {
+          docs.forEach(doc => {
+            posts.push({ ...doc.data(), id: doc.id })
           })
-        } else {
-          let posts = [];
-          snapshot.forEach(doc => {
-            posts.push(Object.assign(doc.data(), { id: doc.id }))
-          })
-          return res.status(200).json(posts)
         }
-      }).catch(err => {
-        return res.status(500).json({
-          message: "getting post fail",
-          errMessage: err.message,
-          errorCode: err.code,
-          err: err
-        });
       })
+
+      if (posts.length === 0) {
+        return res.status(200).json({
+          message: 'nothing to show no posts',
+          code: 'nothing'
+        })
+      } else {
+        posts.sort((a, b) => -a.createdAt.localeCompare(b.createdAt))
+        return res.status(200).json(posts)
+      }
+
+    }).catch(err => {
+      return res.status(500).json({
+        message: "getting posts fail",
+        errMessage: err.message,
+        errorCode: err.code,
+        err: err
+      });
+    })
   } else {
     return res.status(200).json({
       message: 'something went wrong',

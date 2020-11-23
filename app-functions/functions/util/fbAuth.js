@@ -7,8 +7,8 @@ exports.FBAuth = (req, res, next) => {
     req.headers.authorization.startsWith("Bearer ")
   ) {
     idToken = req.headers.authorization.split("Bearer ")[1];
-  }else{
-    return res.status(403).json({error:'Unauthorized'})
+  } else {
+    return res.status(403).json({ error: 'Unauthorized' })
   }
 
   admin
@@ -21,10 +21,17 @@ exports.FBAuth = (req, res, next) => {
         .limit(1)
         .get()
         .then((snapshot) => {
-          let doc = snapshot.docs[0];
-          let data = doc.data();
-          req.userData = data;
-          return next();
+          if (!snapshot.empty) {
+            let doc = snapshot.docs[0];
+            let data = doc.data();
+            req.userData = data;
+            return next();
+          } else {
+            return res.status(403).json({
+              message: "verifying token fail",
+              errMessage: "user doc not found",
+            });
+          }
         });
     })
     .catch((err) => {

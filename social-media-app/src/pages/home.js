@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import Post from '../components/post';
+import NoFriends from '../components/noFriends';
+import NoPosts from '../components/noPosts';
 import './home.css';
 
 // mui
@@ -14,19 +16,49 @@ class Home extends Component {
     this.props.getPosts()
   }
 
+  toShow = () => {
+    let { data: { posts }, UI: { errors } } = this.props;
+    if (errors) {
+      if (errors.other.message) {
+        return (
+          <div>{errors.other.errMessage}</div>
+        )
+      }
+    } else if (posts) {
+      if (posts.code === 'friends') {
+        return (
+          <NoFriends />
+        )
+      } else if (posts.code === 'nothing') {
+        return (
+          <NoPosts />
+        )
+      } else if (posts.length > 0) {
+        return (
+          posts.map(post => <Post post={post} key={post.id} />)
+        )
+      } else {
+        return (
+          <div>
+            Loading ...
+          </div>
+        )
+      }
+    } else {
+      return (
+        <div>
+          Loading ...
+        </div>
+      )
+    }
+  }
+
   render() {
-    let { data: { posts } } = this.props
+    // let { } = this.props
     return (
       <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
-          {
-            posts ? posts.message ?
-              <div>
-                {posts.message}
-              </div>
-              : posts.map(post => <Post post={post} key={post.id} />)
-              : 'Loading ...'
-          }
+          {this.toShow()}
         </Grid>
         <Grid item sm={4} md={4} className='friend-container' >
           Friends
@@ -37,12 +69,12 @@ class Home extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  // UI: state.UI,
+  UI: state.UI,
   data: state.data
 })
 
 const mapActionsToProps = {
-  getPosts
+  getPosts,
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Home);

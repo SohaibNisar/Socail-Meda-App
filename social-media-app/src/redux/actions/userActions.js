@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 
 export const loginUser = (userData, history) => (dispatch) => {
+    dispatch({ type: CLEAR_ERRORS });
     dispatch({ type: LOADING_UI });
     axios.post('/login', userData)
         .then((res) => {
@@ -22,15 +23,53 @@ export const loginUser = (userData, history) => (dispatch) => {
             history.push('/')
         })
         .catch(error => {
-            dispatch({
-                type: SET_ERRORS,
-                payload: error.response.data
-            })
-            dispatch({ type: STOP_LOADING_UI });
+            if (error.response) {
+                dispatch({
+                    type: SET_ERRORS,
+                    payload: error.response.data
+                })
+                dispatch({ type: STOP_LOADING_UI });
+            } else if (error.request) {
+                if (error.toJSON().message === 'Network Error') {
+                    dispatch({
+                        type: SET_ERRORS,
+                        payload: {
+                            other: {
+                                message: "network related issue by axios",
+                                errMessage: "network error"
+                            }
+                        }
+                    })
+                    dispatch({ type: STOP_LOADING_UI });
+                } else {
+                    dispatch({
+                        type: SET_ERRORS,
+                        payload: {
+                            other: {
+                                message: "issue by axios",
+                                errMessage: "something went wrong"
+                            }
+                        }
+                    })
+                    dispatch({ type: STOP_LOADING_UI });
+                }
+            } else {
+                dispatch({
+                    type: SET_ERRORS,
+                    payload: {
+                        other: {
+                            message: "issue by axios",
+                            errMessage: "something went wrong"
+                        }
+                    }
+                })
+                dispatch({ type: STOP_LOADING_UI });
+            }
         })
 }
 
 export const signupUser = (newUserData, history) => (dispatch) => {
+    dispatch({ type: CLEAR_ERRORS });
     dispatch({ type: LOADING_UI });
     axios.post('/signup', newUserData)
         .then((res) => {
@@ -45,11 +84,48 @@ export const signupUser = (newUserData, history) => (dispatch) => {
             history.push('/')
         })
         .catch(error => {
-            dispatch({
-                type: SET_ERRORS,
-                payload: error.response.data
-            })
-            dispatch({ type: STOP_LOADING_UI });
+            if (error.response) {
+                dispatch({
+                    type: SET_ERRORS,
+                    payload: error.response.data
+                })
+                dispatch({ type: STOP_LOADING_UI });
+            } else if (error.request) {
+                if (error.toJSON().message === 'Network Error') {
+                    dispatch({
+                        type: SET_ERRORS,
+                        payload: {
+                            other: {
+                                message: "network related issue by axios",
+                                errMessage: "network error"
+                            }
+                        }
+                    })
+                    dispatch({ type: STOP_LOADING_UI });
+                } else {
+                    dispatch({
+                        type: SET_ERRORS,
+                        payload: {
+                            other: {
+                                message: "issue by axios",
+                                errMessage: "something went wrong"
+                            }
+                        }
+                    })
+                    dispatch({ type: STOP_LOADING_UI });
+                }
+            } else {
+                dispatch({
+                    type: SET_ERRORS,
+                    payload: {
+                        other: {
+                            message: "issue by axios",
+                            errMessage: "something went wrong"
+                        }
+                    }
+                })
+                dispatch({ type: STOP_LOADING_UI });
+            }
         })
 }
 
@@ -59,7 +135,48 @@ export const getUserData = () => (dispatch) => {
             type: SET_USER,
             payload: res.data
         })
-    }).catch(err => {
-        console.log(err.response.data)
+    }).catch(error => {
+        if (error.response) {
+            dispatch({
+                type: SET_ERRORS,
+                payload: error.response.data
+            })
+            dispatch({ type: STOP_LOADING_UI });
+        } else if (error.request) {
+            if (error.toJSON().message === 'Network Error') {
+                dispatch({
+                    type: SET_ERRORS,
+                    payload: {
+                        other: {
+                            message: "network related issue by axios",
+                            errMessage: "network error"
+                        }
+                    }
+                })
+                dispatch({ type: STOP_LOADING_UI });
+            } else {
+                dispatch({
+                    type: SET_ERRORS,
+                    payload: {
+                        other: {
+                            message: "issue by axios",
+                            errMessage: "something went wrong"
+                        }
+                    }
+                })
+                dispatch({ type: STOP_LOADING_UI });
+            }
+        } else {
+            dispatch({
+                type: SET_ERRORS,
+                payload: {
+                    other: {
+                        message: "issue by axios",
+                        errMessage: "something went wrong"
+                    }
+                }
+            })
+            dispatch({ type: STOP_LOADING_UI });
+        }
     })
 }
