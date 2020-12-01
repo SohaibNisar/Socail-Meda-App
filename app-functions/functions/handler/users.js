@@ -8,6 +8,9 @@ const fs = require("fs");
 const path = require("path");
 
 exports.getAuthenticUserData = (req, res) => {
+  let userData = {
+    credentials: req.userData,
+  };
   db.collection('notifications')
     .where('postUserHandle', '==', req.userData.userHandle)
     .orderBy('createdAt', 'desc')
@@ -16,7 +19,14 @@ exports.getAuthenticUserData = (req, res) => {
       querySnapshot.forEach(doc => {
         notifications.push({ ...doc.data(), notificationId: doc.id })
       })
-      return res.json({ notifications, credentials: req.userData })
+      userData.notifications = notifications;
+      return db.collection('likes').where('userHandle', '==', req.userData.userHandle).get()
+    }).then(querySnapshot => {
+      let likes = [];
+      querySnapshot.forEach(doc => {
+        likes.push({ ...doc.data(), likeId: doc.id })
+      })
+      return res.json({ ...userData, likes })
     }).catch(err => res.status(500).json({ errorMessage: err.message, errorCode: err.code, err }))
 }
 

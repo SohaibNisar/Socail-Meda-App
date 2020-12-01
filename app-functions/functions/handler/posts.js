@@ -233,7 +233,7 @@ exports.likePost = (req, res) => {
   db.doc(`posts/${postId}`).get()
     .then(doc => {
       if (!doc.exists) {
-        res.status(400).json({ err: 'post not found' })
+        res.status(404).json({ err: 'post not found' })
       } else {
         db.collection('likes')
           .where('userHandle', '==', userHandle)

@@ -1,10 +1,17 @@
-import { SET_AUTHENTICATED, SET_UNAUTHENTICATED, SET_USER } from '../types';
+import {
+    SET_AUTHENTICATED,
+    SET_UNAUTHENTICATED,
+    SET_USER,
+    LIKE_POST,
+    UNLIKE_POST,
+} from '../types';
 import axios from 'axios'
 
 const initialState = {
     authenticated: false,
-    credential: null,
+    credentials: null,
     notifications: null,
+    likes: [],
 }
 
 export default function (state = initialState, action) {
@@ -20,14 +27,34 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 authenticated: true
-            };
+            }
         case SET_UNAUTHENTICATED:
             localStorage.removeItem('FBIdToken');
             delete axios.defaults.headers.common['Authorization'];
             return {
                 ...state,
                 authenticated: false
-            };
+            }
+        case LIKE_POST:
+            if (state.likes && state.credentials) {
+                state.likes.push({
+                    userHandle: state.credentials.userHandle,
+                    postId: action.payload.id
+                })
+            }
+            return {
+                ...state
+            }
+        case UNLIKE_POST:
+            if (state.likes && state.credentials) {
+                let index = state.likes.findIndex(like => like.postId === action.payload.id)
+                if (index >= 0) {
+                    state.likes.splice(index, 1)
+                }
+            }
+            return {
+                ...state
+            }
         default:
             return state
     }

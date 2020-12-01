@@ -31,11 +31,14 @@ exports.signup = (req, res) => {
                     .createUserWithEmailAndPassword(newUser.email, newUser.password)
                     .then(usersnapshot => {
                         let newUserDatabaseCredentials = {
+                            userId: usersnapshot.user.uid,
                             email: newUser.email,
                             friends: [newUser.userHandle],
-                            userHandle: newUser.userHandle,
                             createdAt: new Date().toISOString(),
-                            userId: usersnapshot.user.uid,
+                            userHandle: newUser.userHandle,
+                            bio: null,
+                            location: null,
+                            website: null,
                             profilePictureUrl: `https://firebasestorage.googleapis.com/v0/b/socialmedia-76e8b.appspot.com/o/no-profile-picture.png?alt=media`
                         };
 

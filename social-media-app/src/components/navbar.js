@@ -2,49 +2,31 @@ import React, { Component } from 'react';
 import { NavLink } from 'react-router-dom';
 import './navbar.css';
 
+// component
+import MyButton from '../util/myButton'
+
 // mui
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import withStyles from '@material-ui/core/styles/withStyles';
-import { Button } from '@material-ui/core';
-
-const styles = {
-    logoutButton: {
-        color: '#ddd !important',
-        borderColor: '#ddd !important',
-    },
-}
+import HomeIcon from '@material-ui/icons/HomeRounded';
+import PeopleAltIcon from '@material-ui/icons/PeopleAlt';
+import NotificationIcon from '@material-ui/icons/Notifications';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 class Navbar extends Component {
     render() {
-        // let { classes } = this.props;
         return (
             <div>
                 <AppBar>
                     <Toolbar variant='dense' className='navbar-container'>
                         <NavLink exact activeClassName='activeNavLink' className='navLink' to='/'>
-                            <Button color='inherit'>
-                                Home
-                            </Button>
+                            <MyButton tip='Home' content={<HomeIcon />} color='inherit' />
                         </NavLink>
-                        {/* <NavLink activeClassName='activeNavLink' className='navLink' to='/auth/login'>
-                            <Button color='inherit'>
-                                Login
-                            </Button>
-                        </NavLink>
-                        <NavLink activeClassName='activeNavLink' className='navLink' to='/auth/signup'>
-                            <Button color='inherit'>
-                                Sign Up
-                            </Button>
-                        </NavLink> */}
                         <NavLink activeClassName='activeNavLink' className='navLink' to='/friends'>
-                            <Button color='inherit'>
-                                Friends
-                            </Button>
+                            <MyButton tip='Friends' content={<PeopleAltIcon />} color='inherit' />
                         </NavLink>
-                        <Button color='inherit' variant="outlined" onClick={this.props.logout}>
-                            logout
-                        </Button>
+                        <MyButton tip='Notifications' content={<NotificationIcon />} color='inherit' />
+                        <MyButton tip='Logout' content={<ExitToAppIcon />} onClick={this.props.logout} color='inherit' />
 
                     </Toolbar>
                 </AppBar>
@@ -53,4 +35,4 @@ class Navbar extends Component {
     }
 }
 
-export default withStyles(styles)(Navbar);
+export default Navbar;

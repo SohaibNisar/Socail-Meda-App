@@ -1,12 +1,17 @@
 import React from 'react';
-import axios from 'axios';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import jwtDecode from "jwt-decode";
+import axios from 'axios';
+import './App.css';
+
+//components
+import Navbar from './components/navbar';
+import themeObject from './util/theme';
+
+// pages
 import Home from './pages/home';
 import Friends from './pages/friends';
 import Login from './pages/loginSignupTabs';
-import Navbar from './components/navbar';
-import './App.css';
 
 // mui
 import { ThemeProvider } from '@material-ui/core/styles/';
@@ -23,24 +28,7 @@ import { getUserData } from './redux/actions/userActions';
 
 axios.defaults.baseURL = 'https://us-central1-socialmedia-76e8b.cloudfunctions.net/api';
 
-
-let theme = CreateMuiTheme({
-  palette: {
-    // primary: teal,
-    primary: {
-      main: '#009688',
-      light: '#80e8dd',
-      dark: '#00857c',
-      contrastText: '#fff',
-    },
-    secondary: {
-      main: '#26a69a',
-      light: '#64d8cb',
-      dark: '#00766c',
-      contrastText: '#fff'
-    },
-  },
-})
+let theme = CreateMuiTheme(themeObject)
 
 const token = localStorage.FBIdToken;
 if (token) {
@@ -72,9 +60,9 @@ let App = (props) => {
               {authenticated ?
                 <>
                   <Route exact path='/' component={Home} />
-                  <Route exact path='/friends' component={Friends} />
+                  <Route path='/friends' component={Friends} />
                 </>
-                : <Route path='/' component={Login} />
+                : <Route exact path='/' component={Login} />
               }
             </Switch>
           </div>

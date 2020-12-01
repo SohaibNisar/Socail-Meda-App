@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime'
-import './post.css';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+// components
+import MyButton from '../util/myButton'
+import DeletePost from './deletePost'
 
 // mui
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -11,9 +14,16 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import DeleteIcon from '@material-ui/icons/Delete';
+import CardActions from '@material-ui/core/CardActions';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import ChatIcon from '@material-ui/icons/Chat';
+
+// redux
+import { connect } from "react-redux";
+import { likePost, unlikePost } from '../redux/actions/dataActions'
+
 
 const styles = {
     card: {
@@ -23,17 +33,28 @@ const styles = {
         // height: 0,
         // paddingTop: '56.25%', 
         // paddingTop: '100%',
-        width:'unset',
-        maxWidth:'100%',
-        margin:'0 auto 20px auto',
+        width: 'unset',
+        maxWidth: '100%',
+        margin: '0 auto 20px auto',
     },
 }
 
 class Post extends Component {
+
+    likePost = (postId) => {
+        this.props.likePost(postId)
+    }
+
+    unlikePost = (postId) => {
+        this.props.unlikePost(postId)
+    }
+
     render() {
         dayjs.extend(relativeTime)
         let { classes } = this.props;
-        let { post } = this.props;
+        let { post, user: { likes, credentials } } = this.props;
+        let liked = likes && (likes.some(like => like.postId === post.id));
+        let deleteButton = post && credentials ? post.userHandle === credentials.userHandle : false;
         return (
             <Card classes={{ root: classes.card }}>
                 <CardHeader
@@ -41,14 +62,13 @@ class Post extends Component {
                         <Avatar alt={post.userHandle} src={post.profilePicture} />
                     }
                     action={
-                        <IconButton aria-label="settings">
-                            <DeleteIcon />
-                        </IconButton>
+                        deleteButton ? <DeletePost postId={post.id} /> : null
                     }
                     title={
                         <Link
                             to={`/user/${post.userHandle}`}
-                            style={{ fontWeight: 'bold', color: '#009688' }}
+                            style={{ fontWeight: 'bold', color: '#009688' }
+                            }
                         >
                             {post.userHandle}
                         </Link>
@@ -64,11 +84,42 @@ class Post extends Component {
                     component="img"
                     className={classes.media}
                     image={post.postMedia}
-                    title={post.userHandle}
+                    title={post.id}
                 />}
+                <CardActions disableSpacing>
+                    {liked ?
+                        <MyButton
+                            tip='Remove Like'
+                            content={<FavoriteIcon />}
+                            color='primary'
+                            onClick={() => this.unlikePost(post.id)}
+                        /> :
+                        <MyButton
+                            tip='Like'
+                            content={<FavoriteBorderIcon />}
+                            color='primary'
+                            onClick={() => this.likePost(post.id)}
+                        />
+                    }
+                    <span>{post.likesCount} Likes</span>
+                    <MyButton tip='Comment' content={<ChatIcon />} color='primary' />
+                    <span>{post.commentsCount} Comments</span>
+                </CardActions>
             </Card>
         )
     }
 }
 
-export default withStyles(styles)(Post);
+const mapStateToProps = (state) => ({
+    // UI: state.UI,
+    data: state.data,
+    user: state.user,
+})
+
+const mapActionsToProps = {
+    // getPosts,
+    likePost,
+    unlikePost,
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Post));

@@ -17,12 +17,14 @@ class Home extends Component {
   }
 
   toShow = () => {
-    let { data: { posts }, UI: { errors } } = this.props;
+    let { data: { posts }, data: { errors } } = this.props;
     if (errors) {
-      if (errors.other.message) {
-        return (
-          <div>{errors.other.errMessage}</div>
-        )
+      if (errors.other) {
+        if (errors.other.message) {
+          return (
+            <div>{errors.other.errMessage}</div>
+          )
+        }
       }
     } else if (posts) {
       if (posts.code === 'friends') {
@@ -54,11 +56,14 @@ class Home extends Component {
   }
 
   render() {
-    // let { } = this.props
+    let { data: { loadingData } } = this.props
     return (
       <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
-          {this.toShow()}
+          {!loadingData ?
+            this.toShow():
+            '...Loading'
+          }
         </Grid>
         <Grid item sm={4} md={4} className='friend-container' >
           Friends
@@ -69,7 +74,7 @@ class Home extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  UI: state.UI,
+  // UI: state.UI,
   data: state.data
 })
 
