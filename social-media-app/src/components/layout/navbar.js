@@ -3,7 +3,8 @@ import { NavLink } from 'react-router-dom';
 import './navbar.css';
 
 // component
-import MyButton from '../util/myButton'
+import MyButton from '../../util/myButton';
+import UploadPost from '../post/uploadPost';
 
 // mui
 import AppBar from '@material-ui/core/AppBar';
@@ -25,6 +26,8 @@ class Navbar extends Component {
                         <NavLink activeClassName='activeNavLink' className='navLink' to='/friends'>
                             <MyButton tip='Friends' content={<PeopleAltIcon />} color='inherit' />
                         </NavLink>
+                        {/* <MyButton tip='Create A Post' content={<UploadPost />} color='inherit' /> */}
+                        <UploadPost />
                         <MyButton tip='Notifications' content={<NotificationIcon />} color='inherit' />
                         <MyButton tip='Logout' content={<ExitToAppIcon />} onClick={this.props.logout} color='inherit' />
 

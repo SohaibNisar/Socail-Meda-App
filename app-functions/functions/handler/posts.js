@@ -8,41 +8,23 @@ const fs = require("fs");
 const path = require("path");
 
 exports.getAllPost = (req, res) => {
-  let friends = req.userData.friends;
-  if (friends == undefined || friends == null) {
-    return res.status(200).json({
-      other:{
-        message: 'nothing to show no friends',
-        code: 'friends'
-      }
-    })
-  } else if (friends.length > 0) {
-    let promises = [];
-    friends.forEach(friend => {
-      let p = db.collection('posts').where('userHandle', '==', friend).get();
-      promises.push(p);
-    })
-
-    Promise.all(promises).then(snapshot => {
-      let posts = [];
-      snapshot.forEach(docs => {
-        if (!docs.empty) {
-          docs.forEach(doc => {
-            posts.push({ ...doc.data(), id: doc.id })
-          })
-        }
-      })
-
-      if (posts.length === 0) {
+  db.collection('posts').where(`toShow.${req.userData.userHandle}`, '==', true)
+    .get().then(querySnapshot => {
+      if (querySnapshot.empty) {
         return res.status(200).json({
-          message: 'nothing to show no posts',
-          code: 'nothing'
+          other: {
+            message: 'nothing to show no friends',
+            code: 'nothing'
+          }
         })
       } else {
-        posts.sort((a, b) => -a.createdAt.localeCompare(b.createdAt))
+        let posts = [];
+        querySnapshot.forEach(doc => {
+          posts.push({ id: doc.id, ...doc.data() })
+        })
+        posts.sort((a, b) => -a.createdAt.localeCompare(b.createdAt));
         return res.status(200).json(posts)
       }
-
     }).catch(err => {
       return res.status(500).json({
         message: "getting posts fail",
@@ -51,53 +33,61 @@ exports.getAllPost = (req, res) => {
         err: err
       });
     })
-  } else {
-    return res.status(200).json({
-      message: 'something went wrong',
-      code: 'error'
-    })
-  }
 };
 
 exports.uploadOnePost = (req, res) => {
+  let friends = req.userData.friends;
+  let toShow = {};
+
+  toShow[req.userData.userHandle] = true;
+
+  friends.forEach(friend => {
+    toShow[friend.userHandle] = true;
+  });
+
   let newPost = {
-    // body: req.body.body,
-    body: `helo beautiful world ${req.userData.userHandle}`,
+    body: null,
     userHandle: req.userData.userHandle,
     createdAt: new Date().toISOString(),
     profilePicture: req.userData.profilePictureUrl,
     postMedia: null,
     likesCount: 0,
     commentsCount: 0,
+    toShow,
   };
 
-  let { errors, valid } = validatePostBody(newPost);
-
-  if (!valid) return res.status(400).json(errors);
 
   let busboy = new Busboy({ headers: req.headers });
   let imageData = {};
+  let formData = {}
+  let media = false;
+  busboy.on("field", (fieldname, val) => {
+    formData[fieldname] = val;
+  })
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
-    if (req.media == true) {
-      if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
-        res.status(400).json({ error: 'wrong file type' })
-      }
-      let imageExtension = filename.split(".")[filename.split(".").length - 1];
-      let imageFileName = `${crypto
-        .randomBytes(11)
-        .toString("hex")}${new Date().valueOf()}.${imageExtension}`;
-      let filepath = path.join(os.tmpdir(), imageFileName);
-      file.pipe(fs.createWriteStream(filepath));
-      imageData = {
-        imageFileName,
-        filepath,
-        mimetype
-      };
+    media = true;
+    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+      res.status(400).json({ other: { error: 'wrong file type' } })
     }
+    let imageExtension = filename.split(".")[filename.split(".").length - 1];
+    let imageFileName = `${crypto
+      .randomBytes(11)
+      .toString("hex")}${new Date().valueOf()}.${imageExtension}`;
+    let filepath = path.join(os.tmpdir(), imageFileName);
+    file.pipe(fs.createWriteStream(filepath));
+    imageData = {
+      imageFileName,
+      filepath,
+      mimetype
+    };
     file.resume();
   });
   busboy.on("finish", function () {
-    if (req.media == true) {
+    let { errors, valid } = validatePostBody(formData);
+    if (!valid) return res.status(400).json(errors)
+    newPost.body = formData.body;
+
+    if (media === true) {
       let uuid = uuidv4();
       admin
         .storage()
@@ -117,41 +107,44 @@ exports.uploadOnePost = (req, res) => {
           db.collection("posts")
             .add(newPost)
             .then(snapshot => {
-              return res.status(200).json({
-                message: `post(media) added with id ${snapshot.id} `
-              });
+              return res.status(200).json({ id: snapshot.id, ...newPost });
             })
             .catch(err => {
               return res.status(500).json({
-                message: "adding post fail",
-                errMessage: err.message,
-                errorCode: err.code,
-                err
+                other: {
+                  message: "adding post fail",
+                  errMessage: err.message,
+                  errorCode: err.code,
+                  err
+                }
               });
             });
         })
         .catch(err => {
           return res.status(500).json({
-            message: "uploading post media to storage fail",
-            errMessage: err.message,
-            errorCode: err.code,
-            err
+            other: {
+              message: "uploading post media to storage fail",
+              errMessage: err.message,
+              errorCode: err.code,
+              err
+            }
           });
         });
     } else {
       db.collection("posts")
         .add(newPost)
         .then(snapshot => {
-          return res.status(200).json({
-            message: `post added with id ${snapshot.id} `
-          });
+          return res.status(200).json({ id: snapshot.id, ...newPost });
         })
         .catch(err => {
           return res.status(500).json({
-            message: "adding post fail",
-            errMessage: err.message,
-            errorCode: err.code,
-            err
+            other: {
+
+              message: "adding post fail",
+              errMessage: err.message,
+              errorCode: err.code,
+              err
+            }
           });
         });
     }

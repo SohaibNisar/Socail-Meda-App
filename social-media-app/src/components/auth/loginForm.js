@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 // redux
-import { loginUser } from '../redux/actions/userActions';
+import { loginUser } from '../../redux/actions/userActions';
 import { connect } from 'react-redux';
 
 const styles = {
@@ -125,7 +125,7 @@ class LoginForm extends Component {
                                 )}
                             </Button>
                             <Typography variant='body2' component={'span'} display='block'>
-                                Dont have an account ? sign up <Link to='/auth/signup'>
+                                Don't have an account ? sign up <Link to='/auth/signup'>
                                     <Typography color='primary' display='inline'>
                                         here
                                     </Typography>

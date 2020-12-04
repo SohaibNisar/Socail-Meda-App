@@ -6,7 +6,8 @@ import {
     CLEAR_DATA_ERRORS,
     LIKE_POST,
     UNLIKE_POST,
-    DELETE_POST
+    DELETE_POST,
+    UPLOAD_POST,
 } from '../types';
 
 const initialState = {
@@ -69,6 +70,11 @@ export default function (state = initialState, action) {
                     state.posts.splice(index, 1)
                 }
             }
+            return {
+                ...state
+            }
+        case UPLOAD_POST:
+            state.posts.unshift(action.payload)
             return {
                 ...state
             }

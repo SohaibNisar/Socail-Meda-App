@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 // component
-import MyButton from '../util/myButton';
+import MyButton from '../../util/myButton';
 
 // mui
 import Button from '@material-ui/core/Button';
@@ -15,7 +15,7 @@ import Typography from '@material-ui/core/Typography';
 
 // redux
 import { connect } from 'react-redux';
-import { deletePost } from '../redux/actions/dataActions'
+import { deletePost } from '../../redux/actions/dataActions';
 
 class DeletePost extends Component {
     constructor() {
@@ -49,11 +49,11 @@ class DeletePost extends Component {
                     fullWidth
                     maxWidth='sm'
                 >
-                    <Typography color='secondary' style={{ fontWeight: 'bold' }}>
-                        <DialogTitle>
+                    <DialogTitle>
+                        <Typography color='secondary' style={{ fontWeight: 'bold' }}>
                             Delete Post
-                        </DialogTitle>
-                    </Typography>
+                        </Typography>
+                    </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                             Are you sure you want to delete this post ?

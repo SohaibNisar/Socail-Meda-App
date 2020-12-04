@@ -1,6 +1,9 @@
 let isEmpty = (string) => {
   if (string === null) return true
-  else if (string.trim() === "") return true;
+  else if (string === undefined) return true
+  else if (string==="null") return true
+  else if (string==="undefined") return true
+  else if (string.trim() === "") return true
   else return false;
 };
 

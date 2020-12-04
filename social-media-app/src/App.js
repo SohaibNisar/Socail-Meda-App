@@ -5,7 +5,7 @@ import axios from 'axios';
 import './App.css';
 
 //components
-import Navbar from './components/navbar';
+import Navbar from './components/layout/navbar';
 import themeObject from './util/theme';
 
 // pages
@@ -51,7 +51,7 @@ let App = (props) => {
     <ThemeProvider theme={theme}>
       <div>
         <Router>
-          {authenticated && <Navbar logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
+          {authenticated && props.user.credentials && <Navbar logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
           <div className="container">
             <Switch>
               {/* <Route exact path="/" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Home />} />
@@ -59,7 +59,7 @@ let App = (props) => {
               <Route path="/friends" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Friends />} /> */}
               {authenticated ?
                 <>
-                  <Route exact path='/' component={Home} />
+                  {props.user.credentials && < Route exact path='/' component={Home} />}
                   <Route path='/friends' component={Friends} />
                 </>
                 : <Route exact path='/' component={Login} />

@@ -1,9 +1,8 @@
 const functions = require("firebase-functions");
 const { getAllPost, uploadOnePost, commentPost, getComments, likePost, unlikePost, deletePost } = require("./handler/posts");
 const { signup, login, } = require("./handler/auth");
-const { getAuthenticUserData, getUserData, uploadImage, addUserDetails, markNotificationRead } = require("./handler/users");
+const { getAuthenticUserData, getUserData, uploadImage, addUserDetails, markNotificationRead, addFriend, getFriendRequests, confirmRequest,deleteRequest } = require("./handler/users");
 const { FBAuth } = require("./util/fbAuth");
-const { checkImage } = require("./util/checkImage");
 const express = require("express");
 const cors = require('cors');
 const { admin, db } = require("./util/admin");
@@ -20,14 +19,18 @@ app.post("/login", login);
 // user
 app.get("/authenticUser", FBAuth, getAuthenticUserData);
 app.get("/user/:userHandle", getUserData);
+app.get("/friendRequests", FBAuth, getFriendRequests);
 app.post("/user/addUserDetails", FBAuth, addUserDetails);
 app.post("/user/uploadImage", FBAuth, uploadImage);
 app.post("/notifications", FBAuth, markNotificationRead);
+app.post("/friendRequest/:userHandle", FBAuth, addFriend);
+app.post("/confirmFriendRequest/:userHandle", FBAuth, confirmRequest);
+app.delete("/friendRequest/:userHandle", FBAuth, deleteRequest);
 
 // post
 app.get("/posts", FBAuth, getAllPost);
 app.get("/post/:postId/comments", FBAuth, getComments);
-app.post("/posts", [checkImage, FBAuth], uploadOnePost);
+app.post("/posts", FBAuth, uploadOnePost);
 app.post("/post/:postId/like", FBAuth, likePost);
 app.post("/post/:postId/unlike", FBAuth, unlikePost);
 app.post("/post/:postId/comment", FBAuth, commentPost);

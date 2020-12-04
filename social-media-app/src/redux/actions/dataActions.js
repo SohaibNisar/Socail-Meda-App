@@ -3,15 +3,51 @@ import {
     LOADING_DATA,
     STOP_LOADING_DATA,
     SET_DATA_ERRORS,
+    LOADING_UI,
+    STOP_LOADING_UI,
+    SET_ERRORS,
+    CLEAR_ERRORS,
     CLEAR_DATA_ERRORS,
     LIKE_POST,
     UNLIKE_POST,
     DELETE_POST,
+    UPLOAD_POST,
 } from '../types';
 import axios from 'axios';
 
+export const uploadPost = (data) => (dispatch) => {
+    dispatch({ type: LOADING_UI })
+    axios({
+        method: "POST",
+        url: "/posts",
+        data: data,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    }).then(res => {
+        dispatch({ type: CLEAR_ERRORS })
+        dispatch({ type: CLEAR_DATA_ERRORS })
+        dispatch({
+            type: UPLOAD_POST,
+            payload: res.data
+        })
+        dispatch({ type: STOP_LOADING_UI })
+    }).catch(err => {
+        if (err.response) {
+            if (err.response.data) {
+                dispatch({
+                    type: SET_ERRORS,
+                    payload: err.response.data
+                })
+            }
+        }
+        setError(err)
+        dispatch({ type: STOP_LOADING_UI })
+        console.log(err)
+    })
+}
+
 export const getPosts = () => (dispatch) => {
-    dispatch({ type: CLEAR_DATA_ERRORS })
     dispatch({ type: LOADING_DATA })
     axios.get('/posts').then((res) => {
         dispatch({
@@ -62,7 +98,6 @@ export const deletePost = (postId) => (dispatch) => {
 }
 
 const setError = (err) => (dispatch) => {
-    dispatch({ type: CLEAR_DATA_ERRORS })
     if (err.response) {
         dispatch({
             type: SET_DATA_ERRORS,
@@ -92,4 +127,5 @@ const setError = (err) => (dispatch) => {
         })
     }
     console.log(err)
+    dispatch({ type: STOP_LOADING_DATA })
 }

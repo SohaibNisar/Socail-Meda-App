@@ -12,6 +12,7 @@ export const CLEAR_ERRORS = 'CLEAR_ERRORS';
 export const STOP_LOADING_UI = 'STOP_LOADING_UI';
 
 // data reducer types
+export const UPLOAD_POST = 'UPLOAD_POSTS';
 export const SET_POSTS = 'SET_POSTS';
 export const SET_DATA_ERRORS = 'SET_DATA_ERRORS';
 export const CLEAR_DATA_ERRORS = 'CLEAR_DATA_ERRORS';

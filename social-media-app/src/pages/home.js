@@ -1,8 +1,11 @@
 import React, { Component } from "react";
-import Post from '../components/post';
-import NoFriends from '../components/noFriends';
-import NoPosts from '../components/noPosts';
+import Post from '../components/post/post';
+import NoPosts from '../components/post/noPosts';
 import './home.css';
+
+// components
+import FriendsList from '../components/friends/friendsList';
+
 
 // mui
 import Grid from '@material-ui/core/Grid';
@@ -24,20 +27,39 @@ class Home extends Component {
           return (
             <div>{errors.other.errMessage}</div>
           )
+        } else {
+          return (
+            <div>
+              Loading ...
+            </div>
+          )
         }
+      } else {
+        return (
+          <div>
+            Loading ...
+          </div>
+        )
       }
     } else if (posts) {
-      if (posts.code === 'friends') {
-        return (
-          <NoFriends />
-        )
-      } else if (posts.code === 'nothing') {
-        return (
-          <NoPosts />
-        )
+      if (posts.other) {
+        if (posts.other.code === 'nothing') {
+          return (
+            <NoPosts mainText='No Posts' subText='Add more friends to see posts' />
+          )
+        } else {
+          return (
+            <div>
+              Loading ...
+            </div>
+          )
+        }
       } else if (posts.length > 0) {
         return (
-          posts.map(post => <Post post={post} key={post.id} />)
+          <>
+            {posts.map(post => <Post post={post} key={post.id} />)}
+            <NoPosts mainText='No More Posts' subText='Add more friends to see more posts' />
+          </>
         )
       } else {
         return (
@@ -56,17 +78,18 @@ class Home extends Component {
   }
 
   render() {
-    let { data: { loadingData } } = this.props
+    let { data: { loadingData }, credentials } = this.props;
     return (
       <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
           {!loadingData ?
-            this.toShow():
+            this.toShow() :
             '...Loading'
           }
         </Grid>
         <Grid item sm={4} md={4} className='friend-container' >
-          Friends
+          {/* <SideProfile /> */}
+          <FriendsList credentials={credentials} />
         </Grid>
       </Grid>
     );
@@ -75,7 +98,8 @@ class Home extends Component {
 
 const mapStateToProps = (state) => ({
   // UI: state.UI,
-  data: state.data
+  data: state.data,
+  credentials: state.user.credentials,
 })
 
 const mapActionsToProps = {

@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 // redux
-import { signupUser } from '../redux/actions/userActions';
+import { signupUser } from '../../redux/actions/userActions';
 import { connect } from 'react-redux';
 
 const styles = {
@@ -55,10 +55,7 @@ class SignUpForm extends Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        this.setState({
-            loading: true
-        })
-
+      
         const newUserData = {
             email: this.state.email,
             password: this.state.password,
@@ -76,7 +73,7 @@ class SignUpForm extends Component {
     }
 
     render() {
-        let { classes ,UI:{loading}} = this.props;
+        let { classes, UI: { loading } } = this.props;
         return (
             <div className={classes.root}>
                 <Typography variant='h5'>Signup</Typography>

@@ -153,3 +153,220 @@ exports.markNotificationRead = (req, res) => {
     })
     .catch(err => { res.status(500).json({ errMessage: err.message, err }) })
 }
+
+exports.addFriend = (req, res) => {
+  const toUserHandle = req.params.userHandle;
+
+  if (toUserHandle === req.userData.userHandle) {
+    res.json({ meassage: 'can not send freind request to own' })
+  }
+
+  db.doc(`users/${req.userData.userHandle}`).get().then(doc1 => {
+    if (!doc1.exists) {
+      res.status(404).json({ other: { message: 'no such user found' } })
+    } else {
+      console.log('doc1')
+      let friends = doc1.data().friends;
+      let friendRequests = doc1.data().friendRequests;
+
+      let alredyFriends = false;
+      let alreadyFriendRequest = false;
+
+      if (friends) {
+        alredyFriends = friends.some(friend => friend.userHandle == toUserHandle);
+      }
+      if (friendRequests) {
+        alreadyFriendRequest = friendRequests.some(request => request.userHandle == toUserHandle);
+      }
+
+      if (alredyFriends) {
+        return res.status(200).json({ message: 'already friends' })
+      } else if (alreadyFriendRequest) {
+        return res.status(200).json({ message: 'already friend request sended' })
+      } else {
+        return db.doc(`users/${toUserHandle}`).get()
+      }
+    }
+  }).then((doc2) => {
+    if (!doc2.exists) {
+      res.status(404).json({ other: { message: 'no such user found' } })
+    } else {
+      let friends = doc2.data().friends;
+      let friendRequests = doc2.data().friendRequests;
+
+      let alredyFriends = false;
+      let alreadyFriendRequest = false;
+
+      if (friends) {
+        alredyFriends = friends.some(friend => friend.userHandle == req.userData.userHandle);
+      }
+      if (friendRequests) {
+        alreadyFriendRequest = friendRequests.some(request => request.userHandle == req.userData.userHandle);
+      }
+
+      if (!friendRequests) {
+        friendRequests = [];
+      }
+
+      if (alredyFriends) {
+        res.status(200).json({ message: 'already friends' })
+      } else if (alreadyFriendRequest) {
+        res.status(200).json({ message: 'already friend request sended' })
+      } else {
+        friendRequests.push({
+          userHandle: req.userData.userHandle,
+          profilePictureUrl: req.userData.profilePictureUrl,
+          createdAt: req.userData.createdAt,
+        })
+        db.doc(`users/${toUserHandle}`).update({ friendRequests })
+          .then((doc) => {
+            res.status(200).json({ message: 'friend request sent' })
+          }).catch(err => res.status(500).json({
+            message: 'add friend reques',
+            errMessage: err.message,
+            errCode: err.code,
+            err,
+          }))
+      }
+    }
+
+  }).catch(err => res.status(500).json({
+    message: 'finding user for friend request fail',
+    errMessage: err.message,
+    errCode: err.code,
+    err,
+  }))
+}
+
+exports.getFriendRequests = (req, res) => {
+  let userHandle = req.userData.userHandle;
+  db.doc(`users/${userHandle}`).get().then(doc => {
+    if (!doc.exists) {
+      res.status(404).json({ other: { message: 'no such user found' } })
+    } else {
+      let friendRequests = doc.data().friendRequests;
+      if (friendRequests) {
+        res.status(200).json({ requests: friendRequests })
+      } else {
+        res.status(200).json({ requests: null })
+      }
+    }
+  }).catch(err => res.status(500).json({
+    message: 'finding user for friend request fail',
+    errMessage: err.message,
+    errCode: err.code,
+    err,
+  }))
+}
+
+exports.confirmRequest = (req, res) => {
+  let userHandle = req.userData.userHandle;
+  let confirmUserHandle = req.params.userHandle;
+
+  db.doc(`users/${confirmUserHandle}`).get().then(doc => {
+    if (!doc.exists) {
+      res.status(404).json({ other: { message: 'no such user found' } })
+    } else {
+      let userRequests = req.userData.friendRequests;
+      let userFriends = req.userData.friends;
+      let confirmUserFriends = doc.data().friends;
+
+      if (!userRequests) {
+        res.status(404).json({ message: 'request not found' })
+      }
+
+      let confirmUserRequestData = userRequests.filter(request => request.userHandle == confirmUserHandle);
+      let remainUserRequests = userRequests.filter(request => request.userHandle != confirmUserHandle);
+
+      if (!confirmUserRequestData || confirmUserRequestData.length <= 0) {
+        res.status(404).json({ message: 'request not found' })
+      }
+
+      if (!userFriends) {
+        userFriends = [];
+      }
+
+      if (!confirmUserFriends) {
+        confirmUserFriends = [];
+      }
+
+      userFriends.push(confirmUserRequestData[0]);
+      confirmUserFriends.push({
+        createdAt: req.userData.createdAt,
+        profilePictureUrl: req.userData.profilePictureUrl,
+        userHandle: req.userData.userHandle,
+      });
+
+      let batch = db.batch();
+
+      batch.update(db.doc(`users/${userHandle}`), {
+        friendRequests: remainUserRequests,
+        friends: userFriends,
+
+      })
+      batch.update(db.doc(`users/${confirmUserHandle}`), {
+        friends: confirmUserFriends,
+      })
+      batch.commit().then(() => {
+        res.json({ message: 'request confirmed' })
+      }).catch(err => res.status(500).json({
+        message: 'updating user for friend request fail',
+        errMessage: err.message,
+        errCode: err.code,
+        err,
+      }))
+    }
+  }).catch(err => res.status(500).json({
+    message: 'finding user for friend request fail',
+    errMessage: err.message,
+    errCode: err.code,
+    err,
+  }))
+}
+
+exports.deleteRequest = (req, res) => {
+  let userHandle = req.userData.userHandle;
+  let deleteUserHandle = req.params.userHandle;
+
+  let requests = req.userData.friendRequests;
+  let request = requests.some(request => request.userHandle == deleteUserHandle);
+
+  if (!requests || !request) {
+    return res.status(404).json({ message: 'request not found' })
+  }
+
+  let remainRequestData = requests.filter(request => request.userHandle != deleteUserHandle);
+
+  if (!remainRequestData || remainRequestData.length <= 0) {
+    remainRequestData = []
+  }
+  db.doc(`users/${userHandle}`).update({
+    friendRequests: remainRequestData,
+  }).then(() => {
+    res.json({ message: 'request deleted' })
+  }).catch(err => res.status(500).json({
+    message: 'deleting user request fail',
+    errMessage: err.message,
+    errCode: err.code,
+    err,
+  }))
+}
+
+exports.unFriend = (req, res) => {
+  let unFriendUserHandle = req.params.userHandle;
+  let batch = db.batch();
+  db.doc(`users/${unFriendUserHandle}`).get().then(doc => {
+    if (!doc.exists) {
+      batch.update(db.doc(`users/${req.userData.userHandle}`, {
+        friends: req.userData.friends.filter(friend => friend.userHandle != unFriendUserHandle)
+      }))
+    } else {
+      batch.update(db.doc(`users/${req.userData.userHandle}`, {
+        friends: req.userData.friends.filter(friend => friend.userHandle != unFriendUserHandle)
+      }))
+      batch.update(db.doc(`users/${unFriendUserHandle}`, {
+        friends: doc.data().friends.filter(friend => friend.userHandle != req.userData.userHandle)
+      }))
+    }
+  })
+}
