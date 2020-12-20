@@ -9,14 +9,62 @@ import FriendsList from '../components/friends/friendsList';
 
 // mui
 import Grid from '@material-ui/core/Grid';
+import withStyle from '@material-ui/core/styles/withStyles';
+import Typography from '@material-ui/core/Typography';
 
 // redux
 import { connect } from 'react-redux'
 import { getPosts } from '../redux/actions/dataActions';
 
+let styles = {
+  sideFriendList: {
+    position: 'fixed',
+    top: '70px',
+    overflow: 'auto',
+    maxHeight: 'calc(100% - 90px)',
+    // width: '33.333%',
+    '&:hover': {
+      '&::-webkit-scrollbar': {
+        display: 'unset',
+      }
+    },
+    '&::-webkit-scrollbar': {
+      width: '14px',
+      display: 'none',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: 'content-box',
+      border: '4px solid transparent',
+      borderRadius: '7px',
+      boxShadow: 'inset 0 0 0 10px'
+    },
+  },
+  title: {
+    padding: '10px',
+    backgroundColor: '#009688',
+    color: '#fff',
+    fontWeight: 'bold',
+    position: 'sticky',
+    top: '0px',
+    zIndex: '10',
+  },
+}
+
 class Home extends Component {
+
+  state = {
+    width: null,
+  };
+
   componentDidMount() {
     this.props.getPosts()
+    this.setWidth();
+  }
+
+  setWidth = () => {
+    this.setState({
+      width: this.container.offsetWidth,
+    });
   }
 
   toShow = () => {
@@ -78,7 +126,8 @@ class Home extends Component {
   }
 
   render() {
-    let { data: { loadingData }, credentials } = this.props;
+    let { data: { loadingData }, friends, classes } = this.props;
+    let { width } = this.state;
     return (
       <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
@@ -87,11 +136,18 @@ class Home extends Component {
             '...Loading'
           }
         </Grid>
-        <Grid item sm={4} md={4} className='friend-container' >
-          {/* <SideProfile /> */}
-          <FriendsList credentials={credentials} />
+        <Grid item sm={4} md={4} className='friend-container' ref={el => (this.container = el)}  >
+
+          {width &&
+            <div style={{ width: width }} className={classes.sideFriendList}>
+              <Typography align='center' className={classes.title}>
+                Friends List
+                </Typography>
+              <FriendsList friends={friends} />
+            </div>
+          }
         </Grid>
-      </Grid>
+      </Grid >
     );
   }
 }
@@ -99,11 +155,11 @@ class Home extends Component {
 const mapStateToProps = (state) => ({
   // UI: state.UI,
   data: state.data,
-  credentials: state.user.credentials,
+  friends: state.user.credentials.friends,
 })
 
 const mapActionsToProps = {
   getPosts,
 }
 
-export default connect(mapStateToProps, mapActionsToProps)(Home);
+export default connect(mapStateToProps, mapActionsToProps)(withStyle(styles)(Home));

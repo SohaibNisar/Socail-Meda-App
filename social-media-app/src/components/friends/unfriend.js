@@ -1,24 +1,16 @@
-import React, { Component } from 'react';
-
-// component
-import MyButton from '../../util/myButton';
+import React, { Component } from 'react'
 
 // mui
-import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
+import Typography from '@material-ui/core/Typography';
 
-// redux
-import { connect } from 'react-redux';
-import { deletePost } from '../../redux/actions/dataActions';
-
-class DeletePost extends Component {
+class Unfriend extends Component {
     constructor() {
         super();
         this.state = {
@@ -34,15 +26,20 @@ class DeletePost extends Component {
         this.setState({ open: false })
     }
 
-    deletePost = () => {
-        this.props.deletePost(this.props.postId)
-        this.setState({ open: false })
+    unFriend = () => {
+        // this.props.deletePost(this.props.postId)
+        // this.setState({ open: false })
     }
+
     render() {
         return (
             <>
                 <div onClick={this.handleClickOpen}>
-                    <MyButton tip='Delete Post' color='secondary' content={<DeleteOutlineIcon />} />
+                    <Button variant="contained" color='primary' component="span" size='small'>
+                        <Typography variant='caption'>
+                            Unfriend
+                        </Typography>
+                    </Button>
                 </div>
                 <Dialog
                     open={this.state.open}
@@ -52,21 +49,21 @@ class DeletePost extends Component {
                 >
                     <DialogTitle>
                         <Typography style={{ fontWeight: 'bold' }}>
-                            Delete Post
+                            Unfriend {`${this.props.userHandle}`}
                         </Typography>
                     </DialogTitle>
                     <Divider variant='middle' />
                     <DialogContent>
                         <DialogContentText>
-                            Are you sure you want to delete this post ?
+                            Are you sure you want to remove {`@${this.props.userHandle}`} as your friend?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleClose} color="primary" style={{ fontWeight: 'bold' }}>
                             CANCEL
                         </Button>
-                        <Button onClick={this.deletePost} color="secondary" style={{ fontWeight: 'bold' }}>
-                            DELETE
+                        <Button onClick={this.unFriend} color="secondary" style={{ fontWeight: 'bold' }}>
+                            Remove
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -75,12 +72,4 @@ class DeletePost extends Component {
     }
 }
 
-const mapStateToProps = (state) => ({
-
-})
-
-const mapActionsToProps = {
-    deletePost,
-}
-
-export default connect(mapStateToProps, mapActionsToProps)(DeletePost);
+export default Unfriend

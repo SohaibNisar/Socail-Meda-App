@@ -12,6 +12,7 @@ import themeObject from './util/theme';
 import Home from './pages/home';
 import Friends from './pages/friends';
 import Login from './pages/loginSignupTabs';
+import User from './pages/user';
 
 // mui
 import { ThemeProvider } from '@material-ui/core/styles/';
@@ -51,7 +52,7 @@ let App = (props) => {
     <ThemeProvider theme={theme}>
       <div>
         <Router>
-          {authenticated && props.user.credentials && <Navbar logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
+          {authenticated && props.user.credentials && <Navbar authenticated={authenticated} logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
           <div className="container">
             <Switch>
               {/* <Route exact path="/" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Home />} />
@@ -59,10 +60,14 @@ let App = (props) => {
               <Route path="/friends" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Friends />} /> */}
               {authenticated ?
                 <>
-                  {props.user.credentials && < Route exact path='/' component={Home} />}
-                  <Route path='/friends' component={Friends} />
+                  {props.user.credentials && <Route exact path='/' component={Home} />}
+                  {props.user.credentials && <Route path='/friends' component={Friends} />}
+                  {props.user.credentials && <Route exact path='/user/:handle' component={User} authenticated={authenticated} />}
+                </> :
+                <>
+                  <Route exact path='/' component={Login} />
+                  <Route exact path='/user/:handle' component={User} authenticated={authenticated} />
                 </>
-                : <Route exact path='/' component={Login} />
               }
             </Switch>
           </div>

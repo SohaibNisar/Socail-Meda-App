@@ -4,7 +4,7 @@ import {
     SET_ERRORS,
     CLEAR_ERRORS,
     SET_AUTHENTICATED,
-    SET_USER
+    SET_USER,
 } from '../types'
 import axios from 'axios';
 
@@ -136,6 +136,7 @@ export const getUserData = () => (dispatch) => {
             payload: res.data
         })
     }).catch(error => {
+        console.log(error)
         if (error.response) {
             dispatch({
                 type: SET_ERRORS,
@@ -180,3 +181,4 @@ export const getUserData = () => (dispatch) => {
         }
     })
 }
+

@@ -20,17 +20,26 @@ class Navbar extends Component {
             <div>
                 <AppBar>
                     <Toolbar variant='dense' className='navbar-container'>
-                        <NavLink exact activeClassName='activeNavLink' className='navLink' to='/'>
-                            <MyButton tip='Home' content={<HomeIcon />} color='inherit' />
-                        </NavLink>
-                        <NavLink activeClassName='activeNavLink' className='navLink' to='/friends'>
-                            <MyButton tip='Friends' content={<PeopleAltIcon />} color='inherit' />
-                        </NavLink>
-                        {/* <MyButton tip='Create A Post' content={<UploadPost />} color='inherit' /> */}
-                        <UploadPost />
-                        <MyButton tip='Notifications' content={<NotificationIcon />} color='inherit' />
-                        <MyButton tip='Logout' content={<ExitToAppIcon />} onClick={this.props.logout} color='inherit' />
-
+                        {this.props.authenticated ?
+                            <>
+                                <NavLink exact activeClassName='activeNavLink' className='navLink' to='/'>
+                                    <MyButton tip='Home' content={<HomeIcon />} color='inherit' />
+                                </NavLink>
+                                <NavLink activeClassName='activeNavLink' className='navLink' to='/friends'>
+                                    <MyButton tip='Friends' content={<PeopleAltIcon />} color='inherit' />
+                                </NavLink>
+                                <UploadPost />
+                                <MyButton tip='Notifications' content={<NotificationIcon />} color='inherit' />
+                                <MyButton tip='Logout' content={<ExitToAppIcon />} onClick={this.props.logout} color='inherit' />
+                            </>
+                            : <>
+                                <NavLink className='navLink' to='/' >
+                                    Login
+                                </NavLink>
+                                <NavLink className='navLink' to='/'>
+                                    Signup
+                                </NavLink>
+                            </>}
                     </Toolbar>
                 </AppBar>
             </div>

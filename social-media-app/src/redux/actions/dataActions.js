@@ -50,6 +50,8 @@ export const uploadPost = (data) => (dispatch) => {
 export const getPosts = () => (dispatch) => {
     dispatch({ type: LOADING_DATA })
     axios.get('/posts').then((res) => {
+        dispatch({ type: CLEAR_ERRORS })
+        dispatch({ type: CLEAR_DATA_ERRORS })
         dispatch({
             type: SET_POSTS,
             payload: res.data
@@ -127,5 +129,5 @@ const setError = (err) => (dispatch) => {
         })
     }
     console.log(err)
-    dispatch({ type: STOP_LOADING_DATA })
+    // dispatch({ type: STOP_LOADING_DATA })
 }

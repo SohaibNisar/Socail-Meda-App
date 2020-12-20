@@ -4,6 +4,8 @@ import thunk from "redux-thunk";
 import userReducers from "./reducers/userReducers";
 import uiReducers from "./reducers/uiReducers";
 import dataReducers from "./reducers/dataReducers";
+import friendsReducers from "./reducers/friendsReducers";
+import staticUserReducers from "./reducers/staticUserReducers";
 
 const initialState = {};
 
@@ -11,6 +13,8 @@ const reducers = combineReducers({
     data: dataReducers,
     UI: uiReducers,
     user: userReducers,
+    friends: friendsReducers,
+    staticUser: staticUserReducers,
 });
 
 const rootReducer = (state, action) => {

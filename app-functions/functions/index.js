@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const { getAllPost, uploadOnePost, commentPost, getComments, likePost, unlikePost, deletePost } = require("./handler/posts");
 const { signup, login, } = require("./handler/auth");
-const { getAuthenticUserData, getUserData, uploadImage, addUserDetails, markNotificationRead, addFriend, getFriendRequests, confirmRequest,deleteRequest } = require("./handler/users");
+const { getAuthenticUserData, getUserData, sugestedFriends, searchFriend, uploadImage, addUserDetails, markNotificationRead, addFriend, getFriendRequests, confirmRequest, deleteRequest, unFriend } = require("./handler/users");
 const { FBAuth } = require("./util/fbAuth");
 const express = require("express");
 const cors = require('cors');
@@ -19,6 +19,8 @@ app.post("/login", login);
 // user
 app.get("/authenticUser", FBAuth, getAuthenticUserData);
 app.get("/user/:userHandle", getUserData);
+app.get("/sugestedFriends", FBAuth, sugestedFriends);
+app.get("/searchUser/:text", searchFriend);
 app.get("/friendRequests", FBAuth, getFriendRequests);
 app.post("/user/addUserDetails", FBAuth, addUserDetails);
 app.post("/user/uploadImage", FBAuth, uploadImage);
@@ -26,6 +28,7 @@ app.post("/notifications", FBAuth, markNotificationRead);
 app.post("/friendRequest/:userHandle", FBAuth, addFriend);
 app.post("/confirmFriendRequest/:userHandle", FBAuth, confirmRequest);
 app.delete("/friendRequest/:userHandle", FBAuth, deleteRequest);
+app.delete("/unFriend/:userHandle", FBAuth, unFriend);
 
 // post
 app.get("/posts", FBAuth, getAllPost);
@@ -37,6 +40,17 @@ app.post("/post/:postId/comment", FBAuth, commentPost);
 app.delete("/post/:postId", FBAuth, deletePost);
 
 exports.api = functions.https.onRequest(app);
+
+// exports.makeUserHandleLower = functions.firestore.document('users/{userHandle}').onCreate((snapshot, context) => {
+//     const userHandle = context.params.userHandle;
+//     db.doc(`users/${userHandle}`).update({
+//         searchUserHandle: userHandle.toLowerCase()
+//     }).then(() => {
+//         console.log('search userHandle updated')
+//     }).catch(err => {
+//         console.log(err)
+//     })
+// })
 
 exports.createLikeNotification = functions.firestore.document('likes/{docId}').onCreate(snapshot => {
     if (snapshot.data().postUserHandle != snapshot.data().userHandle) {
@@ -201,19 +215,25 @@ exports.postDelete = functions.firestore.document('posts/{postId}').onDelete((sn
         })
 })
 
-
-
-
-// exports.deleteCommentNotification = functions.firestore
-//     .document('comments/{docId}')
-//     .onDelete(snapshot => {
-//         db.doc(`notifications/${snapshot.id}`).delete()
-//             .then(() => {
-//                 console.log('comment notification deleted');
-//                 return true;
-//             }).catch(err => {
-//                 console.log(err.message, err)
-//                 return true;
-//             })
-//     })
-
+// exports.friendRequestComfirmed = functions.firestore.document('users/{userHandle}').onUpdate((change, context) => {
+//     let beforeData = change.before.data();
+//     let afterData = change.after.data();
+//     if (beforeData.friends.length < afterData.friends.length) {
+//         let batch = db.batch();
+//         let newFriend = afterData.friends.filter(friend => !beforeData.friends.includes(friend))[0];
+//         db.collection('posts').where('userHandle', '==', context.params.userHandle).get().then(querySnapshot => {
+//             if (!querySnapshot.empty) {
+//                 querySnapshot.forEach(doc => {
+//                     batch.update(db.doc(`posts/${doc.id}`), {
+//                         toShow: {
+//                             ...doc.data().toShow,
+//                             [newFriend.userHandle]: true,
+//                         }
+//                     })
+//                 })
+//             }
+//         }).then(()=>{
+//             console.log(object)
+//         })
+//     }
+// })

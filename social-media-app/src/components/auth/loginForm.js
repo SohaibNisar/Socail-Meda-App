@@ -38,7 +38,7 @@ const styles = {
 
 class LoginForm extends Component {
     constructor() {
-        super()
+        super();
         this.state = {
             email: null,
             password: null,

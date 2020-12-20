@@ -4,6 +4,7 @@ import {
     SET_USER,
     LIKE_POST,
     UNLIKE_POST,
+    UNFRIEND,
 } from '../types';
 import axios from 'axios'
 
@@ -55,6 +56,7 @@ export default function (state = initialState, action) {
             return {
                 ...state
             }
+            // case UNFRIEND:
         default:
             return state
     }

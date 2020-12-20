@@ -158,14 +158,12 @@ exports.addFriend = (req, res) => {
   const toUserHandle = req.params.userHandle;
 
   if (toUserHandle === req.userData.userHandle) {
-    res.json({ meassage: 'can not send freind request to own' })
+    return res.json({ meassage: 'can not send freind request to own' })
   }
-
   db.doc(`users/${req.userData.userHandle}`).get().then(doc1 => {
     if (!doc1.exists) {
-      res.status(404).json({ other: { message: 'no such user found' } })
+      return res.status(404).json({ other: { message: 'no such user found' } })
     } else {
-      console.log('doc1')
       let friends = doc1.data().friends;
       let friendRequests = doc1.data().friendRequests;
 
@@ -187,9 +185,10 @@ exports.addFriend = (req, res) => {
         return db.doc(`users/${toUserHandle}`).get()
       }
     }
+
   }).then((doc2) => {
     if (!doc2.exists) {
-      res.status(404).json({ other: { message: 'no such user found' } })
+      return res.status(404).json({ other: { message: 'no such user found' } })
     } else {
       let friends = doc2.data().friends;
       let friendRequests = doc2.data().friendRequests;
@@ -209,9 +208,9 @@ exports.addFriend = (req, res) => {
       }
 
       if (alredyFriends) {
-        res.status(200).json({ message: 'already friends' })
+        return res.status(200).json({ message: 'already friends' })
       } else if (alreadyFriendRequest) {
-        res.status(200).json({ message: 'already friend request sended' })
+        return res.status(200).json({ message: 'already friend request sended' })
       } else {
         friendRequests.push({
           userHandle: req.userData.userHandle,
@@ -220,7 +219,7 @@ exports.addFriend = (req, res) => {
         })
         db.doc(`users/${toUserHandle}`).update({ friendRequests })
           .then((doc) => {
-            res.status(200).json({ message: 'friend request sent' })
+            return res.status(200).json({ message: 'friend request sent' })
           }).catch(err => res.status(500).json({
             message: 'add friend reques',
             errMessage: err.message,
@@ -357,16 +356,180 @@ exports.unFriend = (req, res) => {
   let batch = db.batch();
   db.doc(`users/${unFriendUserHandle}`).get().then(doc => {
     if (!doc.exists) {
-      batch.update(db.doc(`users/${req.userData.userHandle}`, {
-        friends: req.userData.friends.filter(friend => friend.userHandle != unFriendUserHandle)
-      }))
+      let friends1 = req.userData.friends;
+      let filterfriends1;
+      if (!friends1) {
+        filterfriends1 = []
+      } else {
+        filterfriends1 = friends1.filter(friend => friend.userHandle != unFriendUserHandle)
+      }
+      batch.update(db.doc(`users/${req.userData.userHandle}`), { friends: filterfriends1 })
     } else {
-      batch.update(db.doc(`users/${req.userData.userHandle}`, {
-        friends: req.userData.friends.filter(friend => friend.userHandle != unFriendUserHandle)
-      }))
-      batch.update(db.doc(`users/${unFriendUserHandle}`, {
-        friends: doc.data().friends.filter(friend => friend.userHandle != req.userData.userHandle)
-      }))
+      let friends1 = req.userData.friends;
+      let friends2 = doc.data().friends;
+      let filterfriends1;
+      let filterfriends2;
+
+      if (!friends1) {
+        filterfriends1 = []
+      } else {
+        filterfriends1 = friends1.filter(friend => friend.userHandle != unFriendUserHandle)
+      }
+
+      if (!friends2) {
+        filterfriends2 = []
+      } else {
+        filterfriends2 = friends2.filter(friend => friend.userHandle != req.userData.userHandle)
+      }
+
+      batch.update(db.doc(`users/${req.userData.userHandle}`), { friends: filterfriends1 })
+      batch.update(db.doc(`users/${unFriendUserHandle}`), { friends: filterfriends2 })
     }
-  })
+    return batch.commit()
+  }).then(() => {
+    res.json({ message: 'friend removed' })
+  }).catch(err => res.status(500).json({
+    message: 'removing friend fail',
+    errMessage: err.message,
+    errCode: err.code,
+    err: err,
+  }))
+}
+
+// exports.nextFriends = (req, res) => {
+//   let previousDoc = req.body.previousDoc;
+//   db.collection("users")
+//     .orderBy('createdAt')
+//     .startAfter(previousDoc)
+//     .limit(1)
+//     .get().then((querySnapshot) => {
+//       if (!querySnapshot.empty) {
+//         let lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+//         let friends = [];
+//         querySnapshot.forEach(doc => {
+//           if (doc.data().userHandle != req.userData.userHandle) {
+//             friends.push(...doc.data())
+//           }
+//         })
+//         return res.json({ previousDoc: lastVisible, friends })
+//       } else {
+//         return res.json(null)
+//       }
+//     }).catch(err => res.status(500).json({
+//       message: 'getting next friend sugestions failed',
+//       errMessage: err.message,
+//       errCode: err.code,
+//       err: err,
+//     }));
+// }
+
+exports.sugestedFriends = (req, res) => {
+  let friends = req.userData.friends;
+  let requests = req.userData.friendRequests;
+
+  let noFreiends = () => {
+    db.collection('users')
+      .orderBy('createdAt')
+      .get().then((querySnapshot) => {
+        if (!querySnapshot.empty) {
+          let sugestedFriends = [];
+          querySnapshot.forEach(doc => {
+            sugestedFriends.push({
+              userHandle: doc.data().userHandle,
+              createdAt: doc.data().createdAt,
+              profilePictureUrl: doc.data().profilePictureUrl,
+            })
+          })
+          if (!friends) friends = [];
+          if (!requests) requests = [];
+
+          let filteredSugestedFriends = sugestedFriends.filter(friend => {
+            if (friend.userHandle !== req.userData.userHandle &&
+              !friends.some(item => item.userHandle === friend.userHandle) &&
+              !requests.some(item => item.userHandle === friend.userHandle)
+            ) {
+              return true
+            } else {
+              return false
+            }
+          })
+
+          return res.json(filteredSugestedFriends)
+        } else {
+          return res.json([])
+        }
+      }).catch(err => res.status(500).json({
+        message: 'getting next friend sugestions failed',
+        errMessage: err.message,
+        errCode: err.code,
+        err: err,
+      }));;
+  }
+
+  if (friends) {
+    if (friends.length > 0) {
+      let promises = [];
+      friends.forEach(friend => {
+        if (friend.userHandle != req.userData.userHandle) {
+          let promise = db.doc(`users/${friend.userHandle}`).get();
+          promises.push(promise);
+        }
+      })
+      Promise.all(promises).then((querySnapshot => {
+        let sugestedFriends = []
+        querySnapshot.forEach(doc => {
+          sugestedFriends.push(...doc.data().friends)
+        })
+        if (sugestedFriends.length > 0) {
+          if (sugestedFriends.length > 20) {
+            if (!requests) requests = [];
+
+            let filteredSugestedFriends = sugestedFriends.filter(friend => {
+              if (friend.userHandle !== req.userData.userHandle &&
+                !friends.some(item => item.userHandle === friend.userHandle) &&
+                !requests.some(item => item.userHandle === friend.userHandle)
+              ) {
+                return true
+              } else {
+                return false
+              }
+            })
+
+            return res.json(filteredSugestedFriends)
+          } else {
+            noFreiends()
+          }
+        } else {
+          noFreiends()
+        }
+      })).catch(err => res.status(500).json({
+        message: 'getting next friend sugestions failed',
+        errMessage: err.message,
+        errCode: err.code,
+        err: err,
+      }));
+    } else {
+      noFreiends()
+    }
+  } else {
+    noFreiends()
+  }
+}
+
+exports.searchFriend = (req, res) => {
+  db.collection('users')
+    .where('searchUserHanlde', '>=', req.params.text.toLowerCase())
+    .get().then(querySnapshot => {
+      if (querySnapshot.empty) {
+        res.json('nothing')
+      } else {
+        let data = []
+        querySnapshot.forEach(doc => {
+          data.push(doc.data())
+        })
+        res.json(data)
+      }
+    }).catch(err => {
+      res.json({ message: err.message })
+    })
 }
