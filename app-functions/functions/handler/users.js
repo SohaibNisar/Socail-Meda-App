@@ -45,7 +45,7 @@ exports.getUserData = (req, res) => {
     .then((querySnapshot) => {
       userData.posts = [];
       querySnapshot.forEach(doc => {
-        userData.posts.push({ ...doc.data(), postId: doc.id })
+        userData.posts.push({ ...doc.data(), id: doc.id })
       });
       return res.json(userData)
     })

@@ -1,9 +1,9 @@
 import React, { Component } from "react";
-import Post from '../components/post/post';
-import NoPosts from '../components/post/noPosts';
 import './home.css';
 
 // components
+import Post from '../components/post/post';
+import Nothing from '../util/nothing';
 import FriendsList from '../components/friends/friendsList';
 
 
@@ -11,6 +11,7 @@ import FriendsList from '../components/friends/friendsList';
 import Grid from '@material-ui/core/Grid';
 import withStyle from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
 
 // redux
 import { connect } from 'react-redux'
@@ -67,7 +68,7 @@ class Home extends Component {
     });
   }
 
-  toShow = () => {
+  toShowPosts = () => {
     let { data: { posts }, data: { errors } } = this.props;
     if (errors) {
       if (errors.other) {
@@ -77,62 +78,76 @@ class Home extends Component {
           )
         } else {
           return (
-            <div>
-              Loading ...
-            </div>
+            <Nothing mainText='No Posts' subText='Add more friends to see posts' />
           )
         }
       } else {
         return (
-          <div>
-            Loading ...
-          </div>
+          <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+
         )
       }
     } else if (posts) {
       if (posts.other) {
         if (posts.other.code === 'nothing') {
           return (
-            <NoPosts mainText='No Posts' subText='Add more friends to see posts' />
+            <Nothing mainText='No Posts' subText='Add more friends to see posts' />
           )
         } else {
           return (
-            <div>
-              Loading ...
-            </div>
+            <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+
           )
         }
       } else if (posts.length > 0) {
         return (
           <>
             {posts.map(post => <Post post={post} key={post.id} />)}
-            <NoPosts mainText='No More Posts' subText='Add more friends to see more posts' />
+            <Nothing mainText='No More Posts' subText='Add more friends to see more posts' />
           </>
         )
       } else {
         return (
-          <div>
-            Loading ...
-          </div>
+          <Nothing mainText='No Posts' subText='Add more friends to see posts' />
         )
       }
     } else {
       return (
-        <div>
-          Loading ...
-        </div>
+        <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+      )
+    }
+  }
+
+  toShowFriends = () => {
+    let { friends } = this.props;
+    if (friends) {
+      if (friends.length >= 0) {
+        return (
+          <>
+            <FriendsList friends={friends} />
+            <Nothing mainText='No More Friends' />
+          </>
+        )
+      } else {
+        return (
+          <Nothing mainText='No Friends' />
+        )
+      }
+    } else {
+      return (
+        <Nothing mainText='No Friends' />
       )
     }
   }
 
   render() {
-    let { data: { loadingData }, friends, classes } = this.props;
+    let { data: { loadingData }, classes } = this.props;
     let { width } = this.state;
     return (
       <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
           {!loadingData ?
-            this.toShow() :
+            this.toShowPosts() :
             '...Loading'
           }
         </Grid>
@@ -142,8 +157,10 @@ class Home extends Component {
             <div style={{ width: width }} className={classes.sideFriendList}>
               <Typography align='center' className={classes.title}>
                 Friends List
-                </Typography>
-              <FriendsList friends={friends} />
+              </Typography>
+              <Paper>
+                {this.toShowFriends()}
+              </Paper>
             </div>
           }
         </Grid>

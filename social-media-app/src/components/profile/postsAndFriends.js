@@ -1,20 +1,17 @@
 import React from 'react';
-import LoginForm from '../auth/loginForm';
 
 // components
+import SwipeableViews from 'react-swipeable-views';
 import FriendsList from '../friends/friendsList';
 import Post from '../post/post';
-import SwipeableViews from 'react-swipeable-views';
+import Nothing from '../../util/nothing';
 
 // mui
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Grid from '@material-ui/core/Grid';
 
-// redux
-import { connect } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -36,43 +33,39 @@ let FullWidthTabs = (props) => {
     const handleChangeIndex = (index) => {
         setValue(index);
     };
-    let { posts, friends } = props;
+    let { posts, friends, user } = props;
     return (
-        // <Grid container justify="space-around">
-            // <Grid item sm={7} md={6} xs={11} >
-                <div>
-                    <AppBar position="static" color="default" className={classes.root}>
-                        <Tabs
-                            value={value}
-                            onChange={handleChange}
-                            indicatorColor="primary"
-                            textColor="primary"
-                            variant="fullWidth"
-                            aria-label="full width tabs example"
-                            centered
-                        >
-                            <Tab label="Posts" />
-                            <Tab label="Friends" />
-                        </Tabs>
-                    </AppBar>
-                    <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex} >
-                        <>
-                            {value === 0 &&
-                                posts.map(post => <Post post={post} key={post.postId} />)
-                            }
-                        </>
-                        <>
-                            {value === 1 && <FriendsList friends={friends} />}
-                        </>
-                    </SwipeableViews>
-                </div>
-            // </Grid>
-        // </Grid>
+        <>
+            <AppBar position="static" color="default" className={classes.root}>
+                <Tabs
+                    value={value}
+                    onChange={handleChange}
+                    indicatorColor="primary"
+                    textColor="primary"
+                    variant="fullWidth"
+                    aria-label="full width tabs example"
+                    centered
+                >
+                    <Tab label="Posts" />
+                    <Tab label="Friends" />
+                </Tabs>
+            </AppBar>
+            <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex} >
+                <>
+                    {value === 0 &&
+                        posts.length > 0 ?
+                        posts.map(post => <Post post={post} user={user} key={post.id} staticUser={true} />) :
+                        <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+                    }
+
+                </>
+                <>
+                    {value === 1 && <FriendsList friends={friends} />}
+                </>
+            </SwipeableViews>
+        </>
     );
 }
 
-const mapStateToProps = (state) => ({
-    user: state.user,
-})
 
-export default connect(mapStateToProps)(FullWidthTabs);
+export default FullWidthTabs;

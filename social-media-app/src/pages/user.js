@@ -15,10 +15,10 @@ class User extends Component {
         this.props.getStaticUserData(handle)
     }
 
-    toShow = (staticUser, authenticated) => {
+    toShow = (staticUser, authenticated, user) => {
         if (staticUser) {
             if (staticUser.credentials) {
-                return <Profile staticUser={staticUser} authenticated={authenticated} />
+                return <Profile staticUser={staticUser} authenticated={authenticated} user={user} />
             } else {
                 return 'Loading...'
             }
@@ -28,11 +28,11 @@ class User extends Component {
     }
 
     render() {
-        let { staticUser, authenticated } = this.props;
+        let { staticUser, authenticated, user } = this.props;
         return (
             <div>
                 {!authenticated && <Navbar />}
-                {staticUser.loadingStaticUser ? '...Loading' : this.toShow(staticUser, authenticated)}
+                {staticUser.loadingStaticUser ? '...Loading' : this.toShow(staticUser, authenticated, user)}
             </div>
         )
     }
@@ -41,7 +41,8 @@ class User extends Component {
 
 const mapStateToProps = (state) => ({
     staticUser: state.staticUser,
-    authenticated: state.user.authenticated
+    authenticated: state.user.authenticated,
+    user: state.user,
 })
 
 const mapActionsToProps = {

@@ -4,6 +4,8 @@ import {
     SET_USER,
     LIKE_POST,
     UNLIKE_POST,
+    LIKE_STATIC_USER_POST,
+    UNLIKE_STATIC_USER_POST,
     UNFRIEND,
 } from '../types';
 import axios from 'axios'
@@ -37,6 +39,7 @@ export default function (state = initialState, action) {
                 authenticated: false
             }
         case LIKE_POST:
+        case LIKE_STATIC_USER_POST:
             if (state.likes && state.credentials) {
                 state.likes.push({
                     userHandle: state.credentials.userHandle,
@@ -47,6 +50,7 @@ export default function (state = initialState, action) {
                 ...state
             }
         case UNLIKE_POST:
+        case UNLIKE_STATIC_USER_POST:
             if (state.likes && state.credentials) {
                 let index = state.likes.findIndex(like => like.postId === action.payload.id)
                 if (index >= 0) {
@@ -56,7 +60,7 @@ export default function (state = initialState, action) {
             return {
                 ...state
             }
-            // case UNFRIEND:
+        // case UNFRIEND:
         default:
             return state
     }

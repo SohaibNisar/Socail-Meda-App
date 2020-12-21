@@ -36,7 +36,7 @@ class Profile extends Component {
     }
 
     render() {
-        let { staticUser: { credentials }, staticUser: { posts }, authenticated, classes } = this.props;
+        let { staticUser: { credentials }, staticUser: { posts }, classes } = this.props;
         let { height } = this.state;
         return (
             <Grid container justify='space-evenly' className={classes.root}>

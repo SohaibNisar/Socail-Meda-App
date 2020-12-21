@@ -1,4 +1,10 @@
-import { SET_STATIC_USER, LOADING_STATIC_USER, STOP_LOADING_STATIC_USER } from '../types';
+import {
+    SET_STATIC_USER,
+    LOADING_STATIC_USER,
+    STOP_LOADING_STATIC_USER,
+    LIKE_STATIC_USER_POST,
+    UNLIKE_STATIC_USER_POST,
+} from '../types';
 
 const initialState = {
     loadingStaticUser: false,
@@ -23,6 +29,26 @@ export default function (state = initialState, action) {
                 ...state,
                 loadingStaticUser: false
             };
+        case LIKE_STATIC_USER_POST:
+            if (state.posts) {
+                let index = state.posts.findIndex(post => post.id === action.payload.id);
+                if (index >= 0) {
+                    state.posts[index].likesCount++
+                }
+            }
+            return {
+                ...state,
+            }
+        case UNLIKE_STATIC_USER_POST:
+            if (state.posts) {
+                let index = state.posts.findIndex(post => post.id === action.payload.id);
+                if (index >= 0) {
+                    state.posts[index].likesCount--
+                }
+            }
+            return {
+                ...state,
+            }
         default:
             return state
     }
