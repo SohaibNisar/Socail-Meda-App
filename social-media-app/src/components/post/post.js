@@ -121,8 +121,6 @@ class Post extends Component {
 }
 
 const mapStateToProps = (state) => ({
-    // UI: state.UI,
-    data: state.data,
     user: state.user,
 })
 

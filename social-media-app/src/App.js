@@ -52,7 +52,7 @@ let App = (props) => {
     <ThemeProvider theme={theme}>
       <div>
         <Router>
-          {authenticated && props.user.credentials && <Navbar authenticated={authenticated} logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
+          {authenticated && <Navbar authenticated={authenticated} credentials={props.user.credentials} logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
           <div className="container">
             <Switch>
               {/* <Route exact path="/" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Home />} />

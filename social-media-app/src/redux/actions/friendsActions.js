@@ -4,6 +4,9 @@ import {
     SET_SUGGESTED_FRIENDS,
     LOADING_SUGGESTED_FRIENDS,
     STOP_LOADING_SUGGESTED_FRIENDS,
+    ADD_FRIEND,
+    CANCEL_REQUEST,
+    UNFRIEND,
 } from '../types';
 import axios from 'axios';
 
@@ -19,6 +22,30 @@ export const getSuggestedFriends = () => (dispatch) => {
     }).catch(err => {
         setError(err)
         dispatch({ type: STOP_LOADING_SUGGESTED_FRIENDS })
+    })
+}
+
+export const addFriend = (userHandle) => (dispatch) => {
+    axios.post(`/friendRequest/${userHandle}`).then(res => {
+        dispatch({ type: CLEAR_FRIENDS_ERRORS })
+        dispatch({
+            type: ADD_FRIEND,
+            payload: { userHandle },
+        });
+    }).catch(err => {
+        setError(err)
+    })
+}
+
+export const cancelRequest = (userHandle) => (dispatch) => {
+    axios.delete(`/friendRequest/${userHandle}`).then(res => {
+        dispatch({ type: CLEAR_FRIENDS_ERRORS })
+        dispatch({
+            type: CANCEL_REQUEST,
+            payload: { userHandle },
+        });
+    }).catch(err => {
+        setError(err)
     })
 }
 

@@ -78,25 +78,23 @@ class Home extends Component {
           )
         } else {
           return (
-            <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
           )
         }
       } else {
         return (
-          <Nothing mainText='No Posts' subText='Add more friends to see posts' />
-
+          <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
         )
       }
     } else if (posts) {
       if (posts.other) {
         if (posts.other.code === 'nothing') {
           return (
-            <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
           )
         } else {
           return (
-            <Nothing mainText='No Posts' subText='Add more friends to see posts' />
-
+            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
           )
         }
       } else if (posts.length > 0) {
@@ -108,12 +106,12 @@ class Home extends Component {
         )
       } else {
         return (
-          <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+          <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
         )
       }
     } else {
       return (
-        <Nothing mainText='No Posts' subText='Add more friends to see posts' />
+        <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
       )
     }
   }
@@ -125,7 +123,7 @@ class Home extends Component {
         return (
           <>
             <FriendsList friends={friends} />
-            <Nothing mainText='No More Friends' />
+            <Nothing mainText='No More Friends' size='small' />
           </>
         )
       } else {

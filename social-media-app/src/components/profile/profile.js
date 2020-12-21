@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 // commponents
 import SideProfile from './sideProfile';
 import PostsAndFriends from './postsAndFriends';
+import AddFriendSection from './addFriendSection';
 
 // mui 
 import Grid from '@material-ui/core/Grid';
@@ -20,7 +21,6 @@ const styles = theme => ({
 
 
 class Profile extends Component {
-
     state = {
         height: null,
     };
@@ -36,15 +36,15 @@ class Profile extends Component {
     }
 
     render() {
-        let { staticUser: { credentials }, staticUser: { posts }, classes } = this.props;
+        let { classes } = this.props;
         let { height } = this.state;
         return (
             <Grid container justify='space-evenly' className={classes.root}>
-                <Grid item sm={4} md={3} xs={11} className={classes.sideSection} ref={el => (this.container = el)} style={{ top: height ? `calc(100vh - 80px - ${height}px)` : '80px' }}>
-                    <SideProfile credentials={credentials} />
+                <Grid item sm={4} md={3} xs={11} className={classes.sideSection} ref={el => (this.container = el)} style={{ top: height ? `calc(100vh - 58px - ${height}px)` : '80px' }}>
+                    <SideProfile />
                 </Grid>
                 <Grid item sm={7} md={8} xs={11} >
-                    <PostsAndFriends posts={posts} friends={credentials.friends} />
+                    <PostsAndFriends />
                 </Grid>
             </Grid >
         )

@@ -6,6 +6,8 @@ import {
     UNLIKE_POST,
     LIKE_STATIC_USER_POST,
     UNLIKE_STATIC_USER_POST,
+    ADD_FRIEND,
+    CANCEL_REQUEST,
     UNFRIEND,
 } from '../types';
 import axios from 'axios'
@@ -60,7 +62,24 @@ export default function (state = initialState, action) {
             return {
                 ...state
             }
-        // case UNFRIEND:
+        case ADD_FRIEND:
+            if (!state.credentials.friendRequests) {
+                state.credentials.friendRequests = []
+            }
+            state.credentials.friendRequests.push({ userHandle: action.payload.userHandle })
+            return {
+                ...state
+            }
+        case CANCEL_REQUEST:
+            if (state.credentials) {
+                let index = state.credentials.friendRequests.findIndex(request => request.userHandle === action.payload.userHandle)
+                if (index >= 0) {
+                    state.credentials.friendRequests.splice(index, 1)
+                }
+            }
+            return {
+                ...state
+            }
         default:
             return state
     }

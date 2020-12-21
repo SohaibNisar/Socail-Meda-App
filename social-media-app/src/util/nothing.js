@@ -22,9 +22,9 @@ class Nothing extends Component {
                     </Typography>
                     </CardContent>}
                 <Link to='/friends'>
-                    <Button variant="contained" color="primary" component="span" style={{ margin: '20px auto' }} >
+                    <Button size={this.props.size} variant="contained" color="primary" component="span" style={{ margin: '20px auto' }} >
                         Find Friends
-                        </Button>
+                    </Button>
                 </Link>
                 </Card>
             </Typography >

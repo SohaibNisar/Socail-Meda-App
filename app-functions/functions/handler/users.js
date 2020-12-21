@@ -155,6 +155,8 @@ exports.markNotificationRead = (req, res) => {
 }
 
 exports.addFriend = (req, res) => {
+  let updatedfriendRequests1 = [];
+  let updatedfriendRequests2 = [];
   const toUserHandle = req.params.userHandle;
 
   if (toUserHandle === req.userData.userHandle) {
@@ -178,10 +180,11 @@ exports.addFriend = (req, res) => {
       }
 
       if (alredyFriends) {
-        return res.status(200).json({ message: 'already friends' })
+        return res.status(400).json({ message: 'already friends' })
       } else if (alreadyFriendRequest) {
-        return res.status(200).json({ message: 'already friend request sended' })
+        return res.status(400).json({ message: 'already friend request sended' })
       } else {
+        updatedfriendRequests1 = friendRequests;
         return db.doc(`users/${toUserHandle}`).get()
       }
     }
@@ -208,27 +211,32 @@ exports.addFriend = (req, res) => {
       }
 
       if (alredyFriends) {
-        return res.status(200).json({ message: 'already friends' })
+        return res.status(400).json({ message: 'already friends' })
       } else if (alreadyFriendRequest) {
-        return res.status(200).json({ message: 'already friend request sended' })
+        return res.status(400).json({ message: 'already friend request sended' })
       } else {
         friendRequests.push({
           userHandle: req.userData.userHandle,
           profilePictureUrl: req.userData.profilePictureUrl,
           createdAt: req.userData.createdAt,
         })
-        db.doc(`users/${toUserHandle}`).update({ friendRequests })
-          .then((doc) => {
-            return res.status(200).json({ message: 'friend request sent' })
-          }).catch(err => res.status(500).json({
-            message: 'add friend reques',
-            errMessage: err.message,
-            errCode: err.code,
-            err,
-          }))
+        updatedfriendRequests1.push({
+          userHandle: doc2.data().userHandle,
+          profilePictureUrl: doc2.data().profilePictureUrl,
+          createdAt: doc2.data().createdAt,
+        })
+        updatedfriendRequests2 = friendRequests;
+
+        let batch = db.batch();
+
+        batch.update(db.doc(`users/${toUserHandle}`), { friendRequests: updatedfriendRequests2 })
+        batch.update(db.doc(`users/${req.userData.userHandle}`), { friendRequests: updatedfriendRequests1 })
+        return batch.commit();
       }
     }
 
+  }).then((doc) => {
+    return res.status(200).json({ message: 'friend request sent' })
   }).catch(err => res.status(500).json({
     message: 'finding user for friend request fail',
     errMessage: err.message,
@@ -326,12 +334,17 @@ exports.confirmRequest = (req, res) => {
 exports.deleteRequest = (req, res) => {
   let userHandle = req.userData.userHandle;
   let deleteUserHandle = req.params.userHandle;
+  let batch = db.batch();
 
   let requests = req.userData.friendRequests;
-  let request = requests.some(request => request.userHandle == deleteUserHandle);
+  // let request = requests.some(request => request.userHandle === deleteUserHandle);
 
-  if (!requests || !request) {
-    return res.status(404).json({ message: 'request not found' })
+  // if (!requests || !request) {
+  //   return res.status(404).json({ message: 'request not found' })
+  // }
+
+  if (!requests) {
+    requests = [];
   }
 
   let remainRequestData = requests.filter(request => request.userHandle != deleteUserHandle);
@@ -339,8 +352,23 @@ exports.deleteRequest = (req, res) => {
   if (!remainRequestData || remainRequestData.length <= 0) {
     remainRequestData = []
   }
-  db.doc(`users/${userHandle}`).update({
-    friendRequests: remainRequestData,
+
+  batch.update(db.doc(`users/${userHandle}`), { friendRequests: remainRequestData, })
+
+  db.doc(`users/${deleteUserHandle}`).get().then(doc => {
+    let requests = doc.data().friendRequests;
+
+    if (!requests) {
+      requests = [];
+    }
+
+    let remainRequestData = requests.filter(request => request.userHandle != userHandle);
+
+    if (!remainRequestData || remainRequestData.length <= 0) {
+      remainRequestData = []
+    }
+    batch.update(db.doc(`users/${deleteUserHandle}`), { friendRequests: remainRequestData, })
+    return batch.commit()
   }).then(() => {
     res.json({ message: 'request deleted' })
   }).catch(err => res.status(500).json({

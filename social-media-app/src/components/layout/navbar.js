@@ -28,7 +28,7 @@ class Navbar extends Component {
                                 <NavLink activeClassName='activeNavLink' className='navLink' to='/friends'>
                                     <MyButton tip='Friends' content={<PeopleAltIcon />} color='inherit' />
                                 </NavLink>
-                                <UploadPost />
+                                {this.props.credentials && <UploadPost />}
                                 <MyButton tip='Notifications' content={<NotificationIcon />} color='inherit' />
                                 <MyButton tip='Logout' content={<ExitToAppIcon />} onClick={this.props.logout} color='inherit' />
                             </>

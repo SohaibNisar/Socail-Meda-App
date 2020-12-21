@@ -8,6 +8,10 @@ import Navbar from '../components/layout/navbar';
 import { connect } from 'react-redux';
 import { getStaticUserData } from '../redux/actions/staticUserActions';
 
+// components
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+
 class User extends Component {
 
     componentDidMount() {
@@ -15,15 +19,27 @@ class User extends Component {
         this.props.getStaticUserData(handle)
     }
 
-    toShow = (staticUser, authenticated, user) => {
+    toShow = (staticUser) => {
         if (staticUser) {
             if (staticUser.credentials) {
-                return <Profile staticUser={staticUser} authenticated={authenticated} user={user} />
+                return <Profile />
             } else {
-                return 'Loading...'
+                return (
+                    <Paper>
+                        <Typography align='center' style={{ fontWeight: 'bold', padding: '20px' }}>
+                            No Such User Found
+                        </Typography>
+                    </Paper>
+                )
             }
         } else {
-            return 'Loading...'
+            return (
+                <Paper>
+                    <Typography align='center' style={{ fontWeight: 'bold', padding: '20px' }}>
+                        No Such User Found
+                    </Typography>
+                </Paper>
+            )
         }
     }
 
