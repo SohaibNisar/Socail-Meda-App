@@ -7,6 +7,7 @@ import {
     ADD_FRIEND,
     CANCEL_REQUEST,
     UNFRIEND,
+    CONFIRM_FRIEND,
 } from '../types';
 import axios from 'axios';
 
@@ -33,6 +34,7 @@ export const addFriend = (userHandle) => (dispatch) => {
             payload: { userHandle },
         });
     }).catch(err => {
+        console.log(err.response.data)
         setError(err)
     })
 }
@@ -42,6 +44,30 @@ export const cancelRequest = (userHandle) => (dispatch) => {
         dispatch({ type: CLEAR_FRIENDS_ERRORS })
         dispatch({
             type: CANCEL_REQUEST,
+            payload: { userHandle },
+        });
+    }).catch(err => {
+        setError(err)
+    })
+}
+
+export const unfirend = (userHandle) => (dispatch) => {
+    axios.delete(`/unFriend/${userHandle}`).then(res => {
+        dispatch({ type: CLEAR_FRIENDS_ERRORS })
+        dispatch({
+            type: UNFRIEND,
+            payload: { userHandle },
+        });
+    }).catch(err => {
+        setError(err)
+    })
+}
+
+export const confirmRequest = (userHandle) => (dispatch) => {
+    axios.delete(`/friendRequest/${userHandle}`).then(res => {
+        dispatch({ type: CLEAR_FRIENDS_ERRORS })
+        dispatch({
+            type: CONFIRM_FRIEND,
             payload: { userHandle },
         });
     }).catch(err => {

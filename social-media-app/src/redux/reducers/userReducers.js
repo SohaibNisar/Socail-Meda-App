@@ -9,6 +9,7 @@ import {
     ADD_FRIEND,
     CANCEL_REQUEST,
     UNFRIEND,
+    CONFIRM_FRIEND,
 } from '../types';
 import axios from 'axios'
 
@@ -63,18 +64,43 @@ export default function (state = initialState, action) {
                 ...state
             }
         case ADD_FRIEND:
-            if (!state.credentials.friendRequests) {
-                state.credentials.friendRequests = []
+            if (!state.credentials.friendRequestsSent) {
+                state.credentials.friendRequestsSent = []
             }
-            state.credentials.friendRequests.push({ userHandle: action.payload.userHandle })
+            state.credentials.friendRequestsSent.push({ userHandle: action.payload.userHandle })
             return {
                 ...state
             }
         case CANCEL_REQUEST:
             if (state.credentials) {
-                let index = state.credentials.friendRequests.findIndex(request => request.userHandle === action.payload.userHandle)
+                let index = state.credentials.friendRequestsSent.findIndex(request => request.userHandle === action.payload.userHandle)
                 if (index >= 0) {
-                    state.credentials.friendRequests.splice(index, 1)
+                    state.credentials.friendRequestsSent.splice(index, 1)
+                }
+            }
+            return {
+                ...state
+            }
+        case CONFIRM_FRIEND:
+            if (state.credentials) {
+                let index1 = state.credentials.friendRequestsRecieved.findIndex(request => request.userHandle === action.payload.userHandle)
+                let index2 = state.credentials.friendRequestsSent.findIndex(request => request.userHandle === action.payload.userHandle)
+                if (index1 >= 0) {
+                    state.credentials.friendRequestsRecieved.splice(index1, 1)
+                }
+                if (index2 >= 0) {
+                    state.credentials.friendRequestsSent.splice(index2, 1)
+                }
+                state.credentials.friends.push({ userHandle: action.payload.userHandle })
+            }
+            return {
+                ...state
+            }
+        case UNFRIEND:
+            if (state.credentials) {
+                let index = state.credentials.friends.findIndex(request => request.userHandle === action.payload.userHandle)
+                if (index >= 0) {
+                    state.credentials.friends.splice(index, 1)
                 }
             }
             return {

@@ -16,40 +16,45 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 
-const style = {
+// redux
+import { connect } from 'react-redux'
 
+const styles = {
     list: {
         width: '100%',
     },
 }
 
-class friendsList extends Component {
+class FriendsList extends Component {
     render() {
-        let { classes, friends } = this.props;
+        let { user: { credentials: { userHandle } }, friends, classes } = this.props;
 
         return (
             <List className={classes.list}>
-                {friends.map((friend, index) => {
+                {friends.map(friend => {
                     return (
                         <span key={friend.userHandle}>
-                            <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
-                                <ListItemAvatar>
-                                    <Avatar alt='profile' src={friend.profilePicture} />
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary={
-                                        <Typography color='primary' >
-                                            {`@${friend.userHandle}`}
-                                        </Typography>
-                                    }
-                                    secondary={dayjs(friend.createdAt).format('MMM DD, YYYY')}
-                                />
-                                <ListItemSecondaryAction>
-                                    <Unfriend userHandle={friend.userHandle} />
-                                </ListItemSecondaryAction>
-                            </ListItem>
-                            <Divider variant='middle' component="li" />
-                            {/* {friends.length - 1 !== index && <Divider variant='middle' component="li" />} */}
+                            {friend.userHandle !== userHandle &&
+                                <>
+                                    <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
+                                        <ListItemAvatar>
+                                            <Avatar alt='profile' src={friend.profilePicture} />
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={
+                                                <Typography color='primary' >
+                                                    {`@${friend.userHandle}`}
+                                                </Typography>
+                                            }
+                                            secondary={dayjs(friend.createdAt).format('MMM DD, YYYY')}
+                                        />
+                                        <ListItemSecondaryAction>
+                                            <Unfriend friendUserHandle={friend.userHandle} />
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                    <Divider variant='middle' component="li" />
+                                </>
+                            }
                         </span>
                     )
                 })}
@@ -58,4 +63,9 @@ class friendsList extends Component {
     }
 }
 
-export default withStyle(style)(friendsList);
+const mapStateToProps = (state) => ({
+    user: state.user,
+    friends: state.user.credentials.friends,
+})
+
+export default connect(mapStateToProps)(withStyle(styles)(FriendsList));

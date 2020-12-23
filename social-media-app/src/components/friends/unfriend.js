@@ -10,6 +10,10 @@ import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 
+// redux
+import { connect } from 'react-redux';
+import { unfirend } from '../../redux/actions/friendsActions';
+
 class Unfriend extends Component {
     constructor() {
         super();
@@ -26,50 +30,63 @@ class Unfriend extends Component {
         this.setState({ open: false })
     }
 
-    unFriend = () => {
-        // this.props.deletePost(this.props.postId)
-        // this.setState({ open: false })
+    unFriend = (friendUserHandle) => {
+        this.props.unfirend(friendUserHandle);
+        this.setState({ open: false });
     }
 
     render() {
+        let { user: { authenticated }, friendUserHandle } = this.props;
         return (
             <>
-                <div onClick={this.handleClickOpen}>
-                    <Button variant="contained" color='primary' component="span" size='small'>
-                        <Typography variant='caption'>
-                            Unfriend
+                {authenticated ?
+                    <>
+                        <div onClick={this.handleClickOpen}>
+                            <Button variant="contained" color='primary' component="span" size='small'>
+                                <Typography variant='caption'>
+                                    Unfriend
                         </Typography>
-                    </Button>
-                </div>
-                <Dialog
-                    open={this.state.open}
-                    onClose={this.handleClose}
-                    fullWidth
-                    maxWidth='sm'
-                >
-                    <DialogTitle>
-                        <Typography style={{ fontWeight: 'bold' }}>
-                            Unfriend {`${this.props.userHandle}`}
-                        </Typography>
-                    </DialogTitle>
-                    <Divider variant='middle' />
-                    <DialogContent>
-                        <DialogContentText>
-                            Are you sure you want to remove {`@${this.props.userHandle}`} as your friend?
+                            </Button>
+                        </div>
+                        <Dialog
+                            open={this.state.open}
+                            onClose={this.handleClose}
+                            fullWidth
+                            maxWidth='sm'
+                        >
+                            <DialogTitle>
+                                <Typography style={{ fontWeight: 'bold' }}>
+                                    Unfriend {`${this.props.userHandle}`}
+                                </Typography>
+                            </DialogTitle>
+                            <Divider variant='middle' />
+                            <DialogContent>
+                                <DialogContentText>
+                                    Are you sure you want to remove {`@${this.props.userHandle}`} as your friend?
                         </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleClose} color="primary" style={{ fontWeight: 'bold' }}>
-                            CANCEL
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={this.handleClose} color="primary" style={{ fontWeight: 'bold' }}>
+                                    CANCEL
                         </Button>
-                        <Button onClick={this.unFriend} color="secondary" style={{ fontWeight: 'bold' }}>
-                            Remove
+                                <Button onClick={() => this.unFriend(friendUserHandle)} color="secondary" style={{ fontWeight: 'bold' }}>
+                                    Remove
                         </Button>
-                    </DialogActions>
-                </Dialog>
+                            </DialogActions>
+                        </Dialog>
+                    </> : this.props.history.push('/')
+                }
             </>
         )
     }
 }
 
-export default Unfriend
+const mapStateToProps = (state) => ({
+    user: state.user,
+})
+
+const mapActionsToProps = {
+    unfirend,
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(Unfriend);

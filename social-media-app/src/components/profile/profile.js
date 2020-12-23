@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 // commponents
 import SideProfile from './sideProfile';
 import PostsAndFriends from './postsAndFriends';
-import AddFriendSection from './addFriendSection';
 
 // mui 
 import Grid from '@material-ui/core/Grid';

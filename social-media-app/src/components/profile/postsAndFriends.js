@@ -6,6 +6,7 @@ import FriendsList from '../friends/friendsList';
 import Post from '../post/post';
 import About from './about';
 import AddFriend from '../friends/addFriend';
+import Unfriend from '../friends/unfriend';
 import EditProfile from './editProfile';
 
 // mui
@@ -15,6 +16,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import Toolbar from '@material-ui/core/Toolbar';
 
 // redux
 import { connect } from 'react-redux';
@@ -26,18 +28,39 @@ const useStyles = makeStyles((theme) => ({
         boxShadow: '0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)',
         '@media (max-width: 600px)': {
             borderRadius: '0 0 4px 4px',
-        }
+        },
+        '& .MuiTabScrollButton-root': {
+            display: 'none',
+
+            '@media (max-width: 785px)': {
+                display: 'inline-flex',
+            },
+            '@media (max-width: 600px)': {
+                display: 'none',
+            },
+            '@media (max-width: 430px)': {
+                display: 'inline-flex',
+            },
+        },
+        '& .MuiTabScrollButton-root:nth-child(1)': {
+            width: 25,
+        },
     },
     about: {
         '@media (min-width: 600px)': {
             display: 'none',
-        }
+        },
     },
     paper: {
         padding: 20,
     },
-    tabs: {
-        width: '50%',
+    button: {
+        marginLeft: 'auto',
+        marginRight: 10,
+        marginBottom: 2,
+        '@media (max-width: 600px)': {
+            marginRight: 4,
+        },
     },
 }));
 
@@ -104,11 +127,9 @@ let FullWidthTabs = (props) => {
                 return <EditProfile />
             } else {
                 if (!user.credentials.friends.some(friend => friend.userHandle === credentials.userHandle)) {
-                    return (
-                        <AddFriend friendUsesrHandle={credentials.userHandle} />
-                    )
+                    return <AddFriend friendUserHandle={credentials.userHandle} />
                 } else {
-                    return null
+                    return <Unfriend friendUserHandle={credentials.userHandle} />
                 }
             }
         } else {
@@ -116,24 +137,37 @@ let FullWidthTabs = (props) => {
         }
     };
 
+    const tabs = () => {
+        return (
+            <Tabs
+                value={value}
+                onChange={handleChange}
+                indicatorColor="primary"
+                textColor="primary"
+                variant={!authenticated ? "fullWidth" : "scrollable"}
+                aria-label="tabs"
+                centered={!authenticated ? true : false}
+                scrollButtons='on'
+            >
+                <Tab label="Posts" />
+                <Tab label="About" className={classes.about} />
+                <Tab label="Friends" />
+            </Tabs>
+        )
+    }
+
     return (
         <>
             <AppBar position="static" color="default" className={classes.root}>
-                <Tabs
-                    value={value}
-                    onChange={handleChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    variant="fullWidth"
-                    aria-label="full width tabs"
-                    className={classes.tabs}
-                    centered
-                >
-                    <Tab label="Posts" />
-                    <Tab label="About" className={classes.about} />
-                    <Tab label="Friends" />
-                </Tabs>
-                {toShowButton()}
+                {authenticated ?
+                    <Toolbar className={classes.toolBar} variant='dense' disableGutters>
+                        {tabs()}
+                        <div className={classes.button}>
+                            {toShowButton()}
+                        </div>
+                    </Toolbar> :
+                    tabs()
+                }
             </AppBar>
             <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex} >
                 <>

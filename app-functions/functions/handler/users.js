@@ -155,94 +155,136 @@ exports.markNotificationRead = (req, res) => {
 }
 
 exports.addFriend = (req, res) => {
-  let updatedfriendRequests1 = [];
-  let updatedfriendRequests2 = [];
   const toUserHandle = req.params.userHandle;
 
   if (toUserHandle === req.userData.userHandle) {
     return res.json({ meassage: 'can not send freind request to own' })
   }
-  db.doc(`users/${req.userData.userHandle}`).get().then(doc1 => {
-    if (!doc1.exists) {
-      return res.status(404).json({ other: { message: 'no such user found' } })
-    } else {
-      let friends = doc1.data().friends;
-      let friendRequests = doc1.data().friendRequests;
 
-      let alredyFriends = false;
-      let alreadyFriendRequest = false;
+  let checkSender = () => {
+    let friends = req.userData.friends;
+    let friendRequestsSent = req.userData.friendRequestsSent;
 
-      if (friends) {
-        alredyFriends = friends.some(friend => friend.userHandle == toUserHandle);
-      }
-      if (friendRequests) {
-        alreadyFriendRequest = friendRequests.some(request => request.userHandle == toUserHandle);
-      }
+    let alredyFriends = false;
+    let alreadyfriendRequestsSent = false;
 
-      if (alredyFriends) {
-        return res.status(400).json({ message: 'already friends' })
-      } else if (alreadyFriendRequest) {
-        return res.status(400).json({ message: 'already friend request sended' })
-      } else {
-        updatedfriendRequests1 = friendRequests;
-        return db.doc(`users/${toUserHandle}`).get()
-      }
+    if (!friends) {
+      friends = [];
+    }
+    if (!friendRequestsSent) {
+      friendRequestsSent = [];
     }
 
-  }).then((doc2) => {
-    if (!doc2.exists) {
-      return res.status(404).json({ other: { message: 'no such user found' } })
+    if (friends) {
+      alredyFriends = friends.some(friend => friend.userHandle == toUserHandle);
+    }
+    if (friendRequestsSent) {
+      alreadyfriendRequestsSent = friendRequestsSent.some(request => request.userHandle == toUserHandle);
+    }
+
+    if (alredyFriends) {
+      return res.status(400).json({ message: 'already friends' })
+    } else if (alreadyfriendRequestsSent) {
+      return res.status(400).json({ message: 'already friend request sended' })
     } else {
-      let friends = doc2.data().friends;
-      let friendRequests = doc2.data().friendRequests;
+      return true
+    }
+  }
 
-      let alredyFriends = false;
-      let alreadyFriendRequest = false;
+  let checkReciever = (doc) => {
+    let friends = doc.data().friends;
+    let friendRequestsRecieved = doc.data().friendRequestsRecieved;
 
-      if (friends) {
-        alredyFriends = friends.some(friend => friend.userHandle == req.userData.userHandle);
-      }
-      if (friendRequests) {
-        alreadyFriendRequest = friendRequests.some(request => request.userHandle == req.userData.userHandle);
-      }
+    if (!friends) {
+      friends = [];
+    }
+    if (!friendRequestsRecieved) {
+      friendRequestsRecieved = [];
+    }
 
-      if (!friendRequests) {
-        friendRequests = [];
-      }
+    let alredyFriends = false;
+    let alredyfriendRequestsRecieved = false;
 
-      if (alredyFriends) {
-        return res.status(400).json({ message: 'already friends' })
-      } else if (alreadyFriendRequest) {
-        return res.status(400).json({ message: 'already friend request sended' })
-      } else {
-        friendRequests.push({
+    if (friends) {
+      alredyFriends = friends.some(friend => friend.userHandle == req.userData.userHandle);
+    }
+    if (friendRequestsRecieved) {
+      alredyfriendRequestsRecieved = friendRequestsRecieved.some(request => request.userHandle == req.userData.userHandle);
+    }
+
+    if (alredyFriends) {
+      return res.status(400).json({ message: 'already friends' })
+    } else {
+      return true
+    }
+  }
+
+  db.doc(`users/${toUserHandle}`).get()
+    .then((doc) => {
+      if (!doc.exists) {
+        return res.status(404).json({ other: { message: 'no such user found' } })
+      } else if (checkSender() && checkReciever(doc)) {
+        let friendRequestsRecieved1 = req.userData.friendRequestsRecieved;
+        let friendRequestsRecieved2 = doc.data().friendRequestsRecieved;
+        let friendRequestsSent1 = req.userData.friendRequestsSent;
+        let friendRequestsSent2 = doc.data().friendRequestsSent;
+
+        if (!friendRequestsRecieved1) {
+          friendRequestsRecieved1 = [];
+        }
+        if (!friendRequestsRecieved2) {
+          friendRequestsRecieved2 = [];
+        }
+        if (!friendRequestsSent1) {
+          friendRequestsSent1 = [];
+        }
+        if (!friendRequestsSent2) {
+          friendRequestsSent2 = [];
+        }
+
+        let filterdFriendRequestsRecieved1 = friendRequestsRecieved1.filter(req => req.userHandle !== toUserHandle)
+        let filterdFriendRequestsSent1 = friendRequestsSent1.filter(req => req.userHandle !== toUserHandle)
+        let filterdFriendRequestsRecieved2 = friendRequestsRecieved2.filter(req => req.userHandle !== req.userData.userHandle)
+        let filterdFriendRequestsSent2 = friendRequestsSent2.filter(req => req.userHandle !== req.userData.userHandle)
+
+        let updatedfriendfriendRequestsSent = filterdFriendRequestsSent1;
+        let updatedfriendRequestsRecieved = filterdFriendRequestsRecieved2;
+
+        updatedfriendfriendRequestsSent.push({
+          userHandle: doc.data().userHandle,
+          profilePictureUrl: doc.data().profilePictureUrl,
+          createdAt: doc.data().createdAt,
+        })
+
+        updatedfriendRequestsRecieved.push({
           userHandle: req.userData.userHandle,
           profilePictureUrl: req.userData.profilePictureUrl,
           createdAt: req.userData.createdAt,
         })
-        updatedfriendRequests1.push({
-          userHandle: doc2.data().userHandle,
-          profilePictureUrl: doc2.data().profilePictureUrl,
-          createdAt: doc2.data().createdAt,
-        })
-        updatedfriendRequests2 = friendRequests;
+
 
         let batch = db.batch();
 
-        batch.update(db.doc(`users/${toUserHandle}`), { friendRequests: updatedfriendRequests2 })
-        batch.update(db.doc(`users/${req.userData.userHandle}`), { friendRequests: updatedfriendRequests1 })
+        batch.update(db.doc(`users/${toUserHandle}`), { friendRequestsRecieved: updatedfriendRequestsRecieved })
+        batch.update(db.doc(`users/${toUserHandle}`), { friendRequestsSent: filterdFriendRequestsSent2 })
+        batch.update(db.doc(`users/${req.userData.userHandle}`), { friendRequestsRecieved: filterdFriendRequestsRecieved1 })
+        batch.update(db.doc(`users/${req.userData.userHandle}`), { friendRequestsSent: updatedfriendfriendRequestsSent })
         return batch.commit();
-      }
-    }
 
-  }).then((doc) => {
-    return res.status(200).json({ message: 'friend request sent' })
-  }).catch(err => res.status(500).json({
-    message: 'finding user for friend request fail',
-    errMessage: err.message,
-    errCode: err.code,
-    err,
-  }))
+      } else {
+        return res.status(404).json({ other: { message: 'something went wrong while sending friend request' } })
+      }
+    })
+    .then(() => {
+      return res.status(200).json({ message: 'friend request sent' })
+    })
+    .catch(err => res.status(500).json({
+      message: 'sending friend request fail',
+      errMessage: err.message,
+      errCode: err.code,
+      err,
+    }))
+
 }
 
 exports.getFriendRequests = (req, res) => {
@@ -336,43 +378,43 @@ exports.deleteRequest = (req, res) => {
   let deleteUserHandle = req.params.userHandle;
   let batch = db.batch();
 
-  let requests = req.userData.friendRequests;
-  // let request = requests.some(request => request.userHandle === deleteUserHandle);
-
-  // if (!requests || !request) {
-  //   return res.status(404).json({ message: 'request not found' })
-  // }
-
-  if (!requests) {
-    requests = [];
-  }
-
-  let remainRequestData = requests.filter(request => request.userHandle != deleteUserHandle);
-
-  if (!remainRequestData || remainRequestData.length <= 0) {
-    remainRequestData = []
-  }
-
-  batch.update(db.doc(`users/${userHandle}`), { friendRequests: remainRequestData, })
-
   db.doc(`users/${deleteUserHandle}`).get().then(doc => {
-    let requests = doc.data().friendRequests;
+    if (!doc.exists) {
+      return res.status(404).json({ other: { message: 'no such user found' } })
+    } else {
+      let friendRequestsRecieved1 = req.userData.friendRequestsRecieved;
+      let friendRequestsSent1 = req.userData.friendRequestsSent;
+      let friendRequestsRecieved2 = doc.data().friendRequestsRecieved;
+      let friendRequestsSent2 = doc.data().friendRequestsSent;
 
-    if (!requests) {
-      requests = [];
+      if (!friendRequestsRecieved1) {
+        friendRequestsRecieved1 = [];
+      }
+      if (!friendRequestsSent1) {
+        friendRequestsSent1 = [];
+      }
+      if (!friendRequestsRecieved2) {
+        friendRequestsRecieved2 = [];
+      }
+      if (!friendRequestsSent2) {
+        friendRequestsSent2 = [];
+      }
+
+      let filterdFriendRequestsRecieved1 = friendRequestsRecieved1.filter(req => req.userHandle !== deleteUserHandle)
+      let filterdFriendRequestsSent1 = friendRequestsSent1.filter(req => req.userHandle !== deleteUserHandle)
+      let filterdFriendRequestsRecieved2 = friendRequestsRecieved2.filter(req => req.userHandle !== userHandle)
+      let filterdFriendRequestsSent2 = friendRequestsSent2.filter(req => req.userHandle !== userHandle)
+
+      batch.update(db.doc(`users/${userHandle}`), { friendRequestsRecieved: filterdFriendRequestsRecieved1, })
+      batch.update(db.doc(`users/${userHandle}`), { friendRequestsSent: filterdFriendRequestsSent1, })
+      batch.update(db.doc(`users/${deleteUserHandle}`), { friendRequestsRecieved: filterdFriendRequestsRecieved2, })
+      batch.update(db.doc(`users/${deleteUserHandle}`), { friendRequestsSent: filterdFriendRequestsSent2, })
+      return batch.commit()
     }
-
-    let remainRequestData = requests.filter(request => request.userHandle != userHandle);
-
-    if (!remainRequestData || remainRequestData.length <= 0) {
-      remainRequestData = []
-    }
-    batch.update(db.doc(`users/${deleteUserHandle}`), { friendRequests: remainRequestData, })
-    return batch.commit()
   }).then(() => {
     res.json({ message: 'request deleted' })
   }).catch(err => res.status(500).json({
-    message: 'deleting user request fail',
+    message: 'deleting friend request fail',
     errMessage: err.message,
     errCode: err.code,
     err,
@@ -380,35 +422,28 @@ exports.deleteRequest = (req, res) => {
 }
 
 exports.unFriend = (req, res) => {
-  let unFriendUserHandle = req.params.userHandle;
   let batch = db.batch();
+  let unFriendUserHandle = req.params.userHandle;
+
+  let friends1 = req.userData.friends;
+  let filterfriends1 = friends1.filter(friend => friend.userHandle != unFriendUserHandle);
+
+  if (!friends1) {
+    friends1 = []
+  }
+
   db.doc(`users/${unFriendUserHandle}`).get().then(doc => {
     if (!doc.exists) {
-      let friends1 = req.userData.friends;
-      let filterfriends1;
-      if (!friends1) {
-        filterfriends1 = []
-      } else {
-        filterfriends1 = friends1.filter(friend => friend.userHandle != unFriendUserHandle)
-      }
       batch.update(db.doc(`users/${req.userData.userHandle}`), { friends: filterfriends1 })
     } else {
-      let friends1 = req.userData.friends;
       let friends2 = doc.data().friends;
-      let filterfriends1;
-      let filterfriends2;
-
-      if (!friends1) {
-        filterfriends1 = []
-      } else {
-        filterfriends1 = friends1.filter(friend => friend.userHandle != unFriendUserHandle)
-      }
 
       if (!friends2) {
-        filterfriends2 = []
-      } else {
-        filterfriends2 = friends2.filter(friend => friend.userHandle != req.userData.userHandle)
+        friends2 = []
       }
+
+      let filterfriends1 = friends1.filter(friend => friend.userHandle != unFriendUserHandle)
+      let filterfriends2 = friends2.filter(friend => friend.userHandle != req.userData.userHandle)
 
       batch.update(db.doc(`users/${req.userData.userHandle}`), { friends: filterfriends1 })
       batch.update(db.doc(`users/${unFriendUserHandle}`), { friends: filterfriends2 })
@@ -423,33 +458,6 @@ exports.unFriend = (req, res) => {
     err: err,
   }))
 }
-
-// exports.nextFriends = (req, res) => {
-//   let previousDoc = req.body.previousDoc;
-//   db.collection("users")
-//     .orderBy('createdAt')
-//     .startAfter(previousDoc)
-//     .limit(1)
-//     .get().then((querySnapshot) => {
-//       if (!querySnapshot.empty) {
-//         let lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-//         let friends = [];
-//         querySnapshot.forEach(doc => {
-//           if (doc.data().userHandle != req.userData.userHandle) {
-//             friends.push(...doc.data())
-//           }
-//         })
-//         return res.json({ previousDoc: lastVisible, friends })
-//       } else {
-//         return res.json(null)
-//       }
-//     }).catch(err => res.status(500).json({
-//       message: 'getting next friend sugestions failed',
-//       errMessage: err.message,
-//       errCode: err.code,
-//       err: err,
-//     }));
-// }
 
 exports.sugestedFriends = (req, res) => {
   let friends = req.userData.friends;
