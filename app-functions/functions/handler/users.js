@@ -32,24 +32,28 @@ exports.getAuthenticUserData = (req, res) => {
 
 exports.getUserData = (req, res) => {
   const userHandle = req.params.userHandle;
-  let userData = {};
-  db.doc(`users/${userHandle}`).get()
-    .then(doc => {
-      if (!doc.exists) {
-        return res.status(404).json({ message: 'no such user found' })
-      } else {
-        userData.credentials = doc.data();
-        return db.collection('posts').where('userHandle', '==', userHandle).get()
-      }
-    })
-    .then((querySnapshot) => {
-      userData.posts = [];
-      querySnapshot.forEach(doc => {
-        userData.posts.push({ ...doc.data(), id: doc.id })
-      });
-      return res.json(userData)
-    })
-    .catch(err => { res.json({ errMessage: err.message, err }) })
+  if (userHandle && userHandle != 'undefined' && userHandle != 'null') {
+    let userData = {};
+    db.doc(`users/${userHandle}`).get()
+      .then(doc => {
+        if (!doc.exists) {
+          return res.status(404).json({ message: 'no such user found' })
+        } else {
+          userData.credentials = doc.data();
+          return db.collection('posts').where('userHandle', '==', userHandle).get()
+        }
+      })
+      .then((querySnapshot) => {
+        userData.posts = [];
+        querySnapshot.forEach(doc => {
+          userData.posts.push({ ...doc.data(), id: doc.id })
+        });
+        return res.json(userData)
+      })
+      .catch(err => res.status(500).json({ errMessage: err.message, err }))
+  } else {
+    return res.status(404).json({ message: 'userHandle is not defined' })
+  }
 }
 
 exports.addUserDetails = (req, res) => {
@@ -69,10 +73,19 @@ exports.addUserDetails = (req, res) => {
   })
 }
 
-exports.uploadImage = (req, res) => {
+exports.editProfile = (req, res) => {
   let busboy = new Busboy({ headers: req.headers });
+
   let imageData = {};
+  let formData = {};
+
+  let media = false;
+
+  busboy.on("field", (fieldname, val) => {
+    formData[fieldname] = val;
+  })
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+    media = true;
     if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
       res.status(400).json({ error: 'wrong file type' })
     }
@@ -90,44 +103,69 @@ exports.uploadImage = (req, res) => {
     file.resume();
   });
   busboy.on("finish", function () {
-    let uuid = uuidv4();
-    admin
-      .storage()
-      .bucket()
-      .upload(imageData.filepath, {
-        resumable: false,
-        metadata: {
+    let userDetails = validateUserDetails(formData);
+
+    if (media === true) {
+      let uuid = uuidv4();
+      admin
+        .storage()
+        .bucket()
+        .upload(imageData.filepath, {
+          resumable: false,
           metadata: {
-            contentType: imageData.mimetype,
-            firebaseStorageDownloadTokens: uuid
+            metadata: {
+              contentType: imageData.mimetype,
+              firebaseStorageDownloadTokens: uuid
+            }
           }
-        }
-      })
-      .then(() => {
-        const profilePictureUrl = `https://firebasestorage.googleapis.com/v0/b/socialmedia-76e8b.appspot.com/o/${imageData.imageFileName}?alt=media&token=${uuid}`;
-        db.collection("users")
-          .doc(req.userData.userHandle)
-          .update({ profilePictureUrl })
-          .then(() => {
-            // console.log(profilePictureUrl);
-            return res.json({ message: "image successfuly uploaded" });
-          })
-          .catch(err => {
-            return res.status(500).json({
-              message:
-                "uploading user profile picture, adding url to database fail",
-              errMessage: err.message,
-              errorCode: err.code
+        })
+        .then(() => {
+          const profilePictureUrl = `https://firebasestorage.googleapis.com/v0/b/socialmedia-76e8b.appspot.com/o/${imageData.imageFileName}?alt=media&token=${uuid}`;
+          db.collection("users")
+            .doc(req.userData.userHandle)
+            .update({
+              profilePictureUrl: profilePictureUrl,
+              location: userDetails.location,
+              bio: userDetails.bio,
+              website: userDetails.website,
+            })
+            .then(() => {
+              return res.json({ message: "profile successfuly updated" });
+            })
+            .catch(err => {
+              return res.status(500).json({
+                message:
+                  "updating user profile data and picture fail",
+                errMessage: err.message,
+                errorCode: err.code
+              });
             });
+        })
+        .catch(err => {
+          return res.status(500).json({
+            message: "uploading user profile picture to storage fail",
+            errMessage: err.message,
+            errorCode: err.code
           });
-      })
-      .catch(err => {
-        return res.status(500).json({
-          message: "uploading user profile picture to storage fail",
-          errMessage: err.message,
-          errorCode: err.code
         });
-      });
+    } else {
+      db.collection('users').doc(`${req.userData.userHandle}`).update({
+        location: userDetails.location,
+        bio: userDetails.bio,
+        website: userDetails.website,
+      }).then((snapshot) => {
+        return res.status(200).json({
+          message: `user details added successfully`
+        });
+      }).catch((err) => {
+        return res.status(500).json({
+          message: "adding user details fail",
+          errMessage: err.message,
+          errorCode: err.code,
+          error: err
+        });
+      })
+    }
   });
   busboy.end(req.rawBody);
 };
@@ -156,7 +194,6 @@ exports.markNotificationRead = (req, res) => {
 
 exports.addFriend = (req, res) => {
   const toUserHandle = req.params.userHandle;
-
   if (toUserHandle === req.userData.userHandle) {
     return res.json({ meassage: 'can not send freind request to own' })
   }
@@ -242,10 +279,10 @@ exports.addFriend = (req, res) => {
           friendRequestsSent2 = [];
         }
 
-        let filterdFriendRequestsRecieved1 = friendRequestsRecieved1.filter(req => req.userHandle !== toUserHandle)
-        let filterdFriendRequestsSent1 = friendRequestsSent1.filter(req => req.userHandle !== toUserHandle)
-        let filterdFriendRequestsRecieved2 = friendRequestsRecieved2.filter(req => req.userHandle !== req.userData.userHandle)
-        let filterdFriendRequestsSent2 = friendRequestsSent2.filter(req => req.userHandle !== req.userData.userHandle)
+        let filterdFriendRequestsRecieved1 = friendRequestsRecieved1.filter(request => request.userHandle !== toUserHandle)
+        let filterdFriendRequestsSent1 = friendRequestsSent1.filter(request => request.userHandle !== toUserHandle)
+        let filterdFriendRequestsRecieved2 = friendRequestsRecieved2.filter(request => request.userHandle !== req.userData.userHandle)
+        let filterdFriendRequestsSent2 = friendRequestsSent2.filter(request => request.userHandle !== req.userData.userHandle)
 
         let updatedfriendfriendRequestsSent = filterdFriendRequestsSent1;
         let updatedfriendRequestsRecieved = filterdFriendRequestsRecieved2;
@@ -316,31 +353,37 @@ exports.confirmRequest = (req, res) => {
     if (!doc.exists) {
       res.status(404).json({ other: { message: 'no such user found' } })
     } else {
-      let userRequests = req.userData.friendRequests;
-      let userFriends = req.userData.friends;
-      let confirmUserFriends = doc.data().friends;
+      let friendRequestsRecieved1 = req.userData.friendRequestsRecieved;
+      let friendRequestsSent2 = doc.data().friendRequestsSent;
+      let freinds1 = req.userData.friends;
+      let freinds2 = doc.data().friends;
 
-      if (!userRequests) {
-        res.status(404).json({ message: 'request not found' })
+      if (!friendRequestsRecieved1) {
+        friendRequestsRecieved1 = [];
+      }
+      if (!friendRequestsSent2) {
+        friendRequestsSent2 = [];
       }
 
-      let confirmUserRequestData = userRequests.filter(request => request.userHandle == confirmUserHandle);
-      let remainUserRequests = userRequests.filter(request => request.userHandle != confirmUserHandle);
-
-      if (!confirmUserRequestData || confirmUserRequestData.length <= 0) {
-        res.status(404).json({ message: 'request not found' })
+      if (!freinds1) {
+        freinds1 = [];
+      }
+      if (!freinds2) {
+        freinds2 = [];
       }
 
-      if (!userFriends) {
-        userFriends = [];
-      }
+      let filteredFriendRequestsRecieved1 = friendRequestsRecieved1.filter(request => request.userHandle !== confirmUserHandle);
+      let filteredFriendRequestsSent2 = friendRequestsSent2.filter(request => request.userHandle !== userHandle);
 
-      if (!confirmUserFriends) {
-        confirmUserFriends = [];
-      }
+      let newFreinds1 = freinds1;
+      let newFreinds2 = freinds2;
 
-      userFriends.push(confirmUserRequestData[0]);
-      confirmUserFriends.push({
+      newFreinds1.push({
+        createdAt: doc.data().createdAt,
+        profilePictureUrl: doc.data().profilePictureUrl,
+        userHandle: doc.data().userHandle,
+      });
+      newFreinds2.push({
         createdAt: req.userData.createdAt,
         profilePictureUrl: req.userData.profilePictureUrl,
         userHandle: req.userData.userHandle,
@@ -349,13 +392,14 @@ exports.confirmRequest = (req, res) => {
       let batch = db.batch();
 
       batch.update(db.doc(`users/${userHandle}`), {
-        friendRequests: remainUserRequests,
-        friends: userFriends,
-
+        friendRequestsRecieved: filteredFriendRequestsRecieved1,
+        friends: newFreinds1,
       })
       batch.update(db.doc(`users/${confirmUserHandle}`), {
-        friends: confirmUserFriends,
+        friendRequestsSent: filteredFriendRequestsSent2,
+        friends: newFreinds2,
       })
+
       batch.commit().then(() => {
         res.json({ message: 'request confirmed' })
       }).catch(err => res.status(500).json({

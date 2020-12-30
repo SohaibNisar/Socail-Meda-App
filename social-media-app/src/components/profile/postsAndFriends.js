@@ -68,7 +68,7 @@ let FullWidthTabs = (props) => {
     const classes = useStyles();
     const theme = useTheme();
     const [value, setValue] = React.useState(0);
-    let { user, user: { authenticated }, credentials: { friends }, posts, credentials } = props;
+    let { user, user: { authenticated }, staticUser: { credentials: { friends }, posts, credentials } } = props;
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -90,11 +90,14 @@ let FullWidthTabs = (props) => {
                 </Paper>
             )
         }
-
     };
 
     const toShowFriends = () => {
         if (friends) {
+            let index = friends.findIndex(request => request.userHandle === user.credentials.userHandle)
+            if (index >= 0) {
+                friends.splice(index, 1)
+            }
             if (friends.length > 0) {
                 return (
                     <Paper>
@@ -105,7 +108,7 @@ let FullWidthTabs = (props) => {
                 return (
                     <Paper>
                         <Typography align='center' style={{ fontWeight: 'bold', padding: '20px' }}>
-                            No Friends Available
+                            No Friends
                         </Typography>
                     </Paper>
                 )
@@ -114,7 +117,7 @@ let FullWidthTabs = (props) => {
             return (
                 <Paper>
                     <Typography align='center' style={{ fontWeight: 'bold', padding: '20px' }}>
-                        No Friends
+                        No Friends Available
                     </Typography>
                 </Paper>
             )
@@ -189,8 +192,7 @@ let FullWidthTabs = (props) => {
 }
 
 const mapStateToProps = (state) => ({
-    credentials: state.staticUser.credentials,
-    posts: state.staticUser.posts,
+    staticUser: state.staticUser,
     user: state.user,
 })
 

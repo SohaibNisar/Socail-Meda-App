@@ -18,7 +18,10 @@ export const getStaticUserData = (userHandle) => (dispatch) => {
     }).catch(err => {
         dispatch({
             type: SET_STATIC_USER,
-            payload: null,
+            payload: {
+                credentials: null,
+                posts: [],
+            },
         })
         dispatch({ type: STOP_LOADING_STATIC_USER });
         console.log(err);

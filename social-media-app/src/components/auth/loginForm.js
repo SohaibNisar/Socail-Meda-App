@@ -83,7 +83,6 @@ class LoginForm extends Component {
                                 type='email'
                                 name='email'
                                 placeholder="Enter your email"
-                                multiline
                                 fullWidth
                                 onChange={this.handleChange}
                                 margin="dense"
@@ -96,7 +95,6 @@ class LoginForm extends Component {
                                 type='password'
                                 name='password'
                                 placeholder="Enter your password"
-                                multiline
                                 fullWidth
                                 onChange={this.handleChange}
                                 margin="normal"

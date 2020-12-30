@@ -64,7 +64,7 @@ export const unfirend = (userHandle) => (dispatch) => {
 }
 
 export const confirmRequest = (userHandle) => (dispatch) => {
-    axios.delete(`/friendRequest/${userHandle}`).then(res => {
+    axios.post(`/confirmFriendRequest/${userHandle}`).then(res => {
         dispatch({ type: CLEAR_FRIENDS_ERRORS })
         dispatch({
             type: CONFIRM_FRIEND,

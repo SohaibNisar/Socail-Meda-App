@@ -12,7 +12,7 @@ import RssFeedIcon from '@material-ui/icons/RssFeed';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import QueryBuilderIcon from '@material-ui/icons/QueryBuilder';
 
-const styles = theme => ({
+const styles = {
     profileItem: {
         width: '100%',
         overflow: 'hidden',
@@ -20,13 +20,14 @@ const styles = theme => ({
         display: 'flex',
         alignItems: 'center',
         '& a': {
-            color: '#009688'
+            color: '#009688',
+            marginLeft: 5,
         },
         '& span': {
             marginLeft: 5,
         }
     },
-})
+}
 
 class About extends Component {
     render() {

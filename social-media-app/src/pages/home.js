@@ -117,12 +117,12 @@ class Home extends Component {
   }
 
   toShowFriends = () => {
-    let { friends } = this.props;
-    if (friends) {
-      if (friends.length >= 0) {
+    let { user } = this.props;
+    if (user.credentials) {
+      if (user.credentials.friends.length > 0) {
         return (
           <>
-            <FriendsList friends={friends} />
+            <FriendsList friends={user.credentials.friends} />
             <Nothing mainText='No More Friends' size='small' />
           </>
         )
@@ -139,7 +139,7 @@ class Home extends Component {
   }
 
   render() {
-    let { data: { loadingData }, classes } = this.props;
+    let { data: { loadingData }, loadingUser, classes } = this.props;
     let { width } = this.state;
     return (
       <Grid container justify="space-around">
@@ -157,7 +157,10 @@ class Home extends Component {
                 Friends List
               </Typography>
               <Paper>
-                {this.toShowFriends()}
+                {!loadingUser ?
+                  this.toShowFriends() :
+                  '...Loading'
+                }
               </Paper>
             </div>
           }
@@ -168,9 +171,9 @@ class Home extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  // UI: state.UI,
+  loadingUser: state.user.loading,
   data: state.data,
-  friends: state.user.credentials.friends,
+  user: state.user,
 })
 
 const mapActionsToProps = {

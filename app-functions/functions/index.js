@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const { getAllPost, uploadOnePost, commentPost, getComments, likePost, unlikePost, deletePost } = require("./handler/posts");
 const { signup, login, } = require("./handler/auth");
-const { getAuthenticUserData, getUserData, sugestedFriends, searchFriend, uploadImage, addUserDetails, markNotificationRead, addFriend, getFriendRequests, confirmRequest, deleteRequest, unFriend } = require("./handler/users");
+const { getAuthenticUserData, getUserData, sugestedFriends, searchFriend, editProfile, addUserDetails, markNotificationRead, addFriend, getFriendRequests, confirmRequest, deleteRequest, unFriend } = require("./handler/users");
 const { FBAuth } = require("./util/fbAuth");
 const express = require("express");
 const cors = require('cors');
@@ -23,7 +23,7 @@ app.get("/sugestedFriends", FBAuth, sugestedFriends);
 app.get("/searchUser/:text", searchFriend);
 app.get("/friendRequests", FBAuth, getFriendRequests);
 app.post("/user/addUserDetails", FBAuth, addUserDetails);
-app.post("/user/uploadImage", FBAuth, uploadImage);
+app.post("/user/editProfile", FBAuth, editProfile);
 app.post("/notifications", FBAuth, markNotificationRead);
 app.post("/friendRequest/:userHandle", FBAuth, addFriend);
 app.post("/confirmFriendRequest/:userHandle", FBAuth, confirmRequest);

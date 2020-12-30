@@ -86,7 +86,6 @@ class SignUpForm extends Component {
                                 type='email'
                                 name='email'
                                 placeholder="Enter your email"
-                                multiline
                                 fullWidth
                                 onChange={this.handleChange}
                                 margin="dense"
@@ -99,7 +98,6 @@ class SignUpForm extends Component {
                                 type='password'
                                 name='password'
                                 placeholder="Enter your password"
-                                multiline
                                 fullWidth
                                 onChange={this.handleChange}
                                 margin="normal"
@@ -112,7 +110,6 @@ class SignUpForm extends Component {
                                 type='password'
                                 name='confirmPassword'
                                 placeholder="Confirm your password"
-                                multiline
                                 fullWidth
                                 onChange={this.handleChange}
                                 margin="normal"
@@ -125,7 +122,6 @@ class SignUpForm extends Component {
                                 type='text'
                                 name='userHandle'
                                 placeholder="Enter user handle"
-                                multiline
                                 fullWidth
                                 onChange={this.handleChange}
                                 margin="normal"

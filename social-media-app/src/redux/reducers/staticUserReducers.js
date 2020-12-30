@@ -4,6 +4,7 @@ import {
     STOP_LOADING_STATIC_USER,
     LIKE_STATIC_USER_POST,
     UNLIKE_STATIC_USER_POST,
+    DELETE_POST,
 } from '../types';
 
 const initialState = {
@@ -44,6 +45,16 @@ export default function (state = initialState, action) {
                 let index = state.posts.findIndex(post => post.id === action.payload.id);
                 if (index >= 0) {
                     state.posts[index].likesCount--
+                }
+            }
+            return {
+                ...state,
+            }
+        case DELETE_POST:
+            if (state.posts) {
+                let index = state.posts.findIndex(post => post.id === action.payload.id);
+                if (index >= 0) {
+                    state.posts.splice(index, 1)
                 }
             }
             return {

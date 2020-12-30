@@ -1,8 +1,8 @@
 let isEmpty = (string) => {
   if (string === null) return true
   else if (string === undefined) return true
-  else if (string==="null") return true
-  else if (string==="undefined") return true
+  else if (string === "null") return true
+  else if (string === "undefined") return true
   else if (string.trim() === "") return true
   else return false;
 };
@@ -60,15 +60,17 @@ exports.validatePostBody = (data) => {
 exports.validateUserDetails = (data) => {
   let userDetails = {};
   if (!isEmpty(data.bio)) userDetails.bio = data.bio;
+  else userDetails.bio = null;
   if (!isEmpty(data.location)) userDetails.location = data.location;
+  else userDetails.location = null;
   if (!isEmpty(data.website)) {
     if (data.website.trim().substring(0, 4) !== 'http') {
       userDetails.website = `http://${data.website}`
-      console.log(userDetails.website)
     } else {
       userDetails.website = data.website;
     }
   }
+  else userDetails.website = null;
 
   return userDetails;
 }

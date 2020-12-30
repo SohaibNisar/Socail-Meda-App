@@ -56,13 +56,13 @@ class Unfriend extends Component {
                         >
                             <DialogTitle>
                                 <Typography style={{ fontWeight: 'bold' }}>
-                                    Unfriend {`${this.props.userHandle}`}
+                                    Unfriend {`${friendUserHandle}`}
                                 </Typography>
                             </DialogTitle>
                             <Divider variant='middle' />
                             <DialogContent>
                                 <DialogContentText>
-                                    Are you sure you want to remove {`@${this.props.userHandle}`} as your friend?
+                                    Are you sure you want to remove {`@${friendUserHandle}`} as your friend?
                         </DialogContentText>
                             </DialogContent>
                             <DialogActions>

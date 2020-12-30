@@ -27,7 +27,7 @@ import { getUserData } from './redux/actions/userActions';
 // import { MuiThemeProvider from '@material-ui/core';
 // import teal from '@material-ui/core/colors/teal';
 
-axios.defaults.baseURL = 'https://us-central1-socialmedia-76e8b.cloudfunctions.net/api';
+axios.defaults.baseURL = 'http://localhost:5000/socialmedia-76e8b/us-central1/api';
 
 let theme = CreateMuiTheme(themeObject)
 
@@ -60,7 +60,7 @@ let App = (props) => {
               <Route path="/friends" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Friends />} /> */}
               {authenticated ?
                 <>
-                  {props.user.credentials && <Route exact path='/' component={Home} />}
+                  {<Route exact path='/' component={Home} />}
                   {props.user.credentials && <Route path='/friends' component={Friends} />}
                   {props.user.credentials && <Route exact path='/user/:handle' component={User} authenticated={authenticated} />}
                 </> :

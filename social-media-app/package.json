@@ -41,5 +41,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://us-central1-socialmedia-76e8b.cloudfunctions.net/api"
+  "proxy": "http://localhost:5000/socialmedia-76e8b/us-central1/api"
 }

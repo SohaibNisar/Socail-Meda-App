@@ -1,6 +1,8 @@
 import {
     SET_AUTHENTICATED,
     SET_UNAUTHENTICATED,
+    LOADING_USER,
+    STOP_LOADING_USER,
     SET_USER,
     LIKE_POST,
     UNLIKE_POST,
@@ -18,10 +20,21 @@ const initialState = {
     credentials: null,
     notifications: null,
     likes: [],
+    loading: false,
 }
 
 export default function (state = initialState, action) {
     switch (action.type) {
+        case LOADING_USER:
+            return {
+                ...state,
+                loading: true,
+            }
+        case STOP_LOADING_USER:
+            return {
+                ...state,
+                loading: false,
+            }
         case SET_USER:
             return {
                 // ...state,
