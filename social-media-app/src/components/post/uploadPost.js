@@ -10,7 +10,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import withStyles from '@material-ui/core/styles/withStyles';
-import AddIcon from '@material-ui/icons/Add';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -140,7 +139,7 @@ class UploadPost extends Component {
         return (
             <>
                 <div onClick={this.handleClickOpen}>
-                    <MyButton tip='Create a Post' color='inherit' content={<AddIcon />} />
+                    {this.props.button}
                 </div>
                 <Dialog
                     open={this.state.open}

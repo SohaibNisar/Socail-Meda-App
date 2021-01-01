@@ -54,7 +54,6 @@ class User extends Component {
     }
 }
 
-
 const mapStateToProps = (state) => ({
     staticUser: state.staticUser,
     authenticated: state.user.authenticated,

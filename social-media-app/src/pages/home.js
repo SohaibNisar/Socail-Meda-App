@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import './home.css';
 
 // components
 import Post from '../components/post/post';
@@ -19,11 +18,13 @@ import { getPosts } from '../redux/actions/dataActions';
 
 let styles = {
   sideFriendList: {
-    position: 'fixed',
+    position: 'sticky',
     top: '70px',
     overflow: 'auto',
-    maxHeight: 'calc(100% - 90px)',
-    // width: '33.333%',
+    maxHeight: 'calc(100vh - 90px)',
+    '@media(max-width: 900px)': {
+      display: 'none',
+    },
     '&:hover': {
       '&::-webkit-scrollbar': {
         display: 'unset',
@@ -53,19 +54,8 @@ let styles = {
 
 class Home extends Component {
 
-  state = {
-    width: null,
-  };
-
   componentDidMount() {
     this.props.getPosts()
-    this.setWidth();
-  }
-
-  setWidth = () => {
-    this.setState({
-      width: this.container.offsetWidth,
-    });
   }
 
   toShowPosts = () => {
@@ -138,9 +128,29 @@ class Home extends Component {
     }
   }
 
+  toShowRequests = () => {
+    let { user } = this.props;
+    if (user.credentials) {
+      if (user.credentials.friendRequestsRecieved && user.credentials.friendRequestsRecieved.length > 0) {
+        return (
+          <>
+            <FriendsList friends={user.credentials.friendRequestsRecieved} />
+          </>
+        )
+      } else {
+        return (
+          <Nothing mainText='No Requests' />
+        )
+      }
+    } else {
+      return (
+        <Nothing mainText='No Requests' />
+      )
+    }
+  }
+
   render() {
-    let { data: { loadingData }, loadingUser, classes } = this.props;
-    let { width } = this.state;
+    let { data: { loadingData }, loadingUser, user, classes } = this.props;
     return (
       <Grid container justify="space-around">
         <Grid item sm={7} md={7} xs={11} >
@@ -149,20 +159,22 @@ class Home extends Component {
             '...Loading'
           }
         </Grid>
-        <Grid item sm={4} md={4} className='friend-container' ref={el => (this.container = el)}  >
-
-          {width &&
-            <div style={{ width: width }} className={classes.sideFriendList}>
+        <Grid item sm={4} md={4} className={classes.sideFriendList} ref={el => (this.container = el)}  >
+          {!loadingUser ?
+            <Paper>
+              {user.credentials && user.credentials.friendRequestsRecieved && user.credentials.friendRequestsRecieved.length > 0 &&
+                <>
+                  <Typography align='center' className={classes.title}>
+                    Friend Requests
+                  </Typography>
+                  {this.toShowRequests()}
+                </>
+              }
               <Typography align='center' className={classes.title}>
                 Friends List
               </Typography>
-              <Paper>
-                {!loadingUser ?
-                  this.toShowFriends() :
-                  '...Loading'
-                }
-              </Paper>
-            </div>
+              {this.toShowFriends()}
+            </Paper> : '...Loading'
           }
         </Grid>
       </Grid >
