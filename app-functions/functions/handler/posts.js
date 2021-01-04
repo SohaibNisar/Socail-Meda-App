@@ -66,9 +66,9 @@ exports.uploadOnePost = (req, res) => {
   })
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
     media = true;
-    if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
-      res.status(400).json({ other: { error: 'wrong file type' } })
-    }
+    // if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+    //   res.status(400).json({ other: { error: 'wrong file type' } })
+    // }
     let imageExtension = filename.split(".")[filename.split(".").length - 1];
     let imageFileName = `${crypto
       .randomBytes(11)
@@ -111,7 +111,7 @@ exports.uploadOnePost = (req, res) => {
             })
             .catch(err => {
               return res.status(500).json({
-                other: {
+                uploadPost: {
                   message: "adding post fail",
                   errMessage: err.message,
                   errorCode: err.code,
@@ -122,8 +122,8 @@ exports.uploadOnePost = (req, res) => {
         })
         .catch(err => {
           return res.status(500).json({
-            other: {
-              message: "uploading post media to storage fail",
+            uploadPost: {
+              message: "adding post fail",
               errMessage: err.message,
               errorCode: err.code,
               err
@@ -138,8 +138,7 @@ exports.uploadOnePost = (req, res) => {
         })
         .catch(err => {
           return res.status(500).json({
-            other: {
-
+            uploadPost: {
               message: "adding post fail",
               errMessage: err.message,
               errorCode: err.code,

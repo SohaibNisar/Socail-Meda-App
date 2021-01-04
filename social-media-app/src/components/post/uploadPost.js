@@ -71,21 +71,23 @@ class UploadPost extends Component {
             body: null,
             localFile: null,
             serverFile: null,
-            errors: {}
+            errors: {},
         }
     }
 
     componentWillReceiveProps(nextprops) {
-        if (nextprops.UI.errors) {
-            this.setState({ errors: nextprops.UI.errors })
+        if (nextprops.data.errors) {
+            this.setState({
+                errors: nextprops.data.errors,
+            })
         }
-        if (!nextprops.UI.errors && !nextprops.UI.loading) {
+        if (!nextprops.data.errors && !nextprops.UI.loading) {
             this.setState({
                 open: false,
                 body: null,
                 localFile: null,
                 serverFile: null,
-                errors: {}
+                errors: {},
             });
         }
     }
@@ -201,9 +203,9 @@ class UploadPost extends Component {
                                     </Button>
                                 </label>
                             </Typography>
-                            {this.state.errors.other && (
+                            {this.state.errors.uploadPost && (
                                 <Typography color="error" className={classes.errorText}>
-                                    {this.state.errors.other && this.state.errors.other.errMessage}
+                                    {this.state.errors.other.uploadPost}
                                 </Typography>
                             )}
                             <Button
@@ -227,6 +229,7 @@ class UploadPost extends Component {
 }
 
 const mapStateToProps = (state) => ({
+    data: state.data,
     UI: state.UI,
     userHandle: state.user.credentials.userHandle
 })

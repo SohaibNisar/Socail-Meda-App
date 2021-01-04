@@ -5,7 +5,6 @@ import {
     SET_DATA_ERRORS,
     LOADING_UI,
     STOP_LOADING_UI,
-    SET_ERRORS,
     CLEAR_ERRORS,
     CLEAR_DATA_ERRORS,
     LIKE_POST,
@@ -33,17 +32,8 @@ export const uploadPost = (data) => (dispatch) => {
         })
         dispatch({ type: STOP_LOADING_UI })
     }).catch(err => {
-        if (err.response) {
-            if (err.response.data) {
-                dispatch({
-                    type: SET_ERRORS,
-                    payload: err.response.data
-                })
-            }
-        }
-        setError(err)
+        dispatch(setError(err))
         dispatch({ type: STOP_LOADING_UI })
-        console.log(err)
     })
 }
 
@@ -57,8 +47,8 @@ export const getPosts = () => (dispatch) => {
             payload: res.data
         })
         dispatch({ type: STOP_LOADING_DATA })
-    }).catch(error => {
-        setError(error)
+    }).catch(err => {
+        dispatch(setError(err))
     })
 }
 
@@ -71,7 +61,7 @@ export const likePost = (postId) => (dispatch) => {
             }
         })
     }).catch(err => {
-        setError(err)
+        dispatch(setError(err))
     })
 }
 
@@ -84,7 +74,7 @@ export const unlikePost = (postId) => (dispatch) => {
             }
         })
     }).catch(err => {
-        setError(err)
+        dispatch(setError(err))
     })
 }
 
@@ -95,7 +85,7 @@ export const deletePost = (postId) => (dispatch) => {
             payload: { id: postId }
         })
     }).catch((err => {
-        setError(err)
+        dispatch(setError(err))
     }))
 }
 
@@ -129,5 +119,4 @@ const setError = (err) => (dispatch) => {
         })
     }
     console.log(err)
-    // dispatch({ type: STOP_LOADING_DATA })
 }
