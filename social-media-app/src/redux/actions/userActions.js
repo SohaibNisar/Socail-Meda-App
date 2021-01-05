@@ -149,9 +149,10 @@ export const getUserData = () => (dispatch) => {
                 credentials: null,
                 notifications: null,
                 likes: [],
+                loading: true,
             },
         })
-        dispatch({ type: STOP_LOADING_USER })
+        // dispatch({ type: STOP_LOADING_USER })
     })
 }
 

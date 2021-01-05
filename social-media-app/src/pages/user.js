@@ -13,10 +13,22 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 
 class User extends Component {
+    state = {
+        handle: null,
+    }
 
     componentDidMount() {
         let handle = this.props.match.params.handle;
-        this.props.getStaticUserData(handle)
+        this.setState({ handle });
+        this.props.getStaticUserData(handle);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        let handle = nextProps.match.params.handle;
+        if (handle !== this.state.handle) {
+            this.setState({ handle });
+            this.props.getStaticUserData(handle);
+        }
     }
 
     toShow = (staticUser) => {

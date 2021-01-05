@@ -10,36 +10,40 @@ import withStyles from '@material-ui/core/styles/withStyles';
 
 const styles = theme => ({
     sideSection: {
-        height: 'fit-content',
         position: 'sticky',
+        top: '70px',
+        overflow: 'auto',
+        maxHeight: 'calc(100vh - 90px)',
+        '&:hover': {
+            '&::-webkit-scrollbar': {
+                display: 'unset',
+            }
+        },
+        '&::-webkit-scrollbar': {
+            width: '14px',
+            display: 'none',
+        },
+        '&::-webkit-scrollbar-thumb': {
+            background: 'content-box',
+            border: '4px solid transparent',
+            borderRadius: '7px',
+            boxShadow: 'inset 0 0 0 10px'
+        },
         '@media (max-width: 600px)': {
             position: 'unset',
+            maxHeight: 'unset',
+            overflow: 'unset',
         }
     },
 })
 
 
 class Profile extends Component {
-    state = {
-        height: null,
-    };
-
-    componentDidMount() {
-        this.setHeight();
-    }
-
-    setHeight = () => {
-        this.setState({
-            height: this.container.offsetHeight,
-        });
-    }
-
     render() {
         let { classes } = this.props;
-        let { height } = this.state;
         return (
             <Grid container justify='space-evenly' className={classes.root}>
-                <Grid item sm={4} md={3} xs={11} className={classes.sideSection} ref={el => (this.container = el)} style={{ top: height ? `calc(100vh - 58px - ${height}px)` : '80px' }}>
+                <Grid item sm={4} md={3} xs={11} className={classes.sideSection}>
                     <SideProfile />
                 </Grid>
                 <Grid item sm={7} md={8} xs={11} >

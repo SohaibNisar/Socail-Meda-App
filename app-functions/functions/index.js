@@ -26,8 +26,7 @@ const { FBAuth } = require("./util/fbAuth");
 const express = require("express");
 const cors = require('cors');
 const { admin, db } = require("./util/admin");
-// const { firestore } = require("firebase");
-// const { admin } = require("./util/admin");
+
 
 const app = express();
 app.use(cors({ origin: true }));

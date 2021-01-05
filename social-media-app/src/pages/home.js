@@ -28,17 +28,19 @@ let styles = {
     '&:hover': {
       '&::-webkit-scrollbar': {
         display: 'unset',
-      }
+      },
+      '&::-webkit-scrollbar-thumb': {
+        boxShadow: 'inset 0 0 0 10px',
+      },
     },
     '&::-webkit-scrollbar': {
       width: '14px',
-      display: 'none',
     },
     '&::-webkit-scrollbar-thumb': {
       background: 'content-box',
       border: '4px solid transparent',
       borderRadius: '7px',
-      boxShadow: 'inset 0 0 0 10px'
+      boxShadow: 'transparent 0 0 0 10px',
     },
   },
   title: {
@@ -50,6 +52,12 @@ let styles = {
     top: '0px',
     zIndex: '10',
   },
+  marginBottomLarge: {
+    marginBottom: 20,
+  },
+  marginBottomSmall: {
+    marginBottom: 3,
+  },
 }
 
 class Home extends Component {
@@ -59,7 +67,7 @@ class Home extends Component {
   }
 
   toShowPosts = () => {
-    let { data: { posts }, data: { errors } } = this.props;
+    let { data: { posts }, data: { errors }, classes } = this.props;
     if (errors) {
       if (errors.other) {
         if (errors.other.message) {
@@ -68,68 +76,88 @@ class Home extends Component {
           )
         } else {
           return (
-            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+            <div className={classes.marginBottomLarge}>
+              <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+            </div>
           )
         }
       } else {
         return (
-          <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+          <div className={classes.marginBottomLarge}>
+            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+          </div>
         )
       }
     } else if (posts) {
       if (posts.other) {
         if (posts.other.code === 'nothing') {
           return (
-            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+            <div className={classes.marginBottomLarge}>
+              <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+            </div>
           )
         } else {
           return (
-            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+            <div className={classes.marginBottomLarge}>
+              <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+            </div>
           )
         }
       } else if (posts.length > 0) {
         return (
           <>
             {posts.map(post => <Post post={post} key={post.id} />)}
-            <Nothing mainText='No More Posts' subText='Add more friends to see more posts' />
+            <div className={classes.marginBottomLarge}>
+              <Nothing mainText='No More Posts Available' subText='Add more friends to see more posts' />
+            </div>
           </>
         )
       } else {
         return (
-          <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+          <div className={classes.marginBottomLarge}>
+            <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+          </div>
         )
       }
     } else {
       return (
-        <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+        <div className={classes.marginBottomLarge}>
+          <Nothing mainText='No Posts Available' subText='Add more friends to see posts' />
+        </div>
       )
     }
   }
 
   toShowFriends = () => {
-    let { user } = this.props;
+    let { user, classes } = this.props;
     if (user.credentials) {
       if (user.credentials.friends.length > 0) {
         return (
           <>
             <FriendsList friends={user.credentials.friends} />
-            <Nothing mainText='No More Friends' size='small' />
+            <div className={classes.marginBottomSmall}>
+              <Nothing mainText='No More Friends' size='small' />
+            </div>
           </>
         )
       } else {
         return (
-          <Nothing mainText='No Friends' />
+          <div className={classes.marginBottomSmall}>
+            <Nothing mainText='No Friends' />
+          </div>
         )
       }
     } else {
       return (
-        <Nothing mainText='No Friends' />
+        <div className={classes.marginBottomSmall}>
+          <Nothing mainText='No Friends' />
+        </div>
       )
     }
   }
 
   toShowRequests = () => {
-    let { user } = this.props;
+    let { user, classes } = this.props;
     if (user.credentials) {
       if (user.credentials.friendRequestsRecieved && user.credentials.friendRequestsRecieved.length > 0) {
         return (
@@ -139,12 +167,16 @@ class Home extends Component {
         )
       } else {
         return (
-          <Nothing mainText='No Requests' />
+          <div className={classes.marginBottomSmall}>
+            <Nothing mainText='No Requests' />
+          </div>
         )
       }
     } else {
       return (
-        <Nothing mainText='No Requests' />
+        <div className={classes.marginBottomSmall}>
+          <Nothing mainText='No Requests' />
+        </div>
       )
     }
   }

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
-
+import {Link} from 'react-router-dom';
 // components
 import Unfriend from './unfriend';
 import AddFriend from './addFriend';
@@ -13,7 +13,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import MuiLink from '@material-ui/core/Link/Link'
+// import MuiLink from '@material-ui/core/Link/Link'
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 
@@ -37,7 +37,7 @@ class FriendsList extends Component {
                         <span key={friend.userHandle}>
                             {friend.userHandle !== credentials.userHandle &&
                                 <>
-                                    <ListItem button component={MuiLink} href={`/user/${friend.userHandle}`}>
+                                    <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
                                         <ListItemAvatar>
                                             <Avatar alt='profile' src={friend.profilePicture} />
                                         </ListItemAvatar>
