@@ -38,7 +38,7 @@ class AddFriend extends Component {
         if (!friendRequestsRecieved) {
             friendRequestsRecieved = [];
         }
-
+        
         let requested = friendRequestsSent && (friendRequestsSent.some(request => request.userHandle === friendUserHandle));
         let recieved = friendRequestsRecieved && (friendRequestsRecieved.some(request => request.userHandle === friendUserHandle));
 

@@ -3,6 +3,8 @@ import {
     STOP_LOADING_UI,
     LOADING_USER,
     STOP_LOADING_USER,
+    LOADING_STATIC_USER,
+    STOP_LOADING_STATIC_USER,
     SET_ERRORS,
     CLEAR_ERRORS,
     SET_AUTHENTICATED,
@@ -152,11 +154,11 @@ export const getUserData = () => (dispatch) => {
                 loading: true,
             },
         })
-        // dispatch({ type: STOP_LOADING_USER })
     })
 }
 
 export const editProfile = (data, userHandle) => (dispatch) => {
+    dispatch({ type: LOADING_STATIC_USER })
     dispatch({ type: LOADING_USER })
     dispatch({
         type: SET_USER,
@@ -186,5 +188,6 @@ export const editProfile = (data, userHandle) => (dispatch) => {
     }).catch(err => {
         console.log(err)
         dispatch({ type: STOP_LOADING_USER })
+        dispatch({ type: STOP_LOADING_STATIC_USER })
     })
 }

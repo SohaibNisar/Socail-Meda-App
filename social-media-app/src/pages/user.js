@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 // components
 import Profile from '../components/profile/profile';
-import Navbar from '../components/layout/navbar';
 
 // redux
 import { connect } from 'react-redux';
@@ -17,11 +16,11 @@ class User extends Component {
         handle: null,
     }
 
-    componentDidMount() {
-        let handle = this.props.match.params.handle;
-        this.setState({ handle });
-        this.props.getStaticUserData(handle);
-    }
+    // componentDidMount() {
+    //     let handle = this.props.match.params.handle;
+    //     this.setState({ handle });
+    //     this.props.getStaticUserData(handle);
+    // }
 
     componentWillReceiveProps(nextProps) {
         let handle = nextProps.match.params.handle;
@@ -33,8 +32,8 @@ class User extends Component {
 
     toShow = (staticUser) => {
         if (staticUser) {
-            if (staticUser.credentials) {
-                return <Profile />
+            if (staticUser.credentials && staticUser.credentials.userHandle) {
+                return <Profile key={this.state.handle} />
             } else {
                 return (
                     <Paper>
@@ -59,8 +58,14 @@ class User extends Component {
         let { staticUser, authenticated, user } = this.props;
         return (
             <div>
-                {!authenticated && <Navbar />}
-                {staticUser.loadingStaticUser ? '...Loading' : this.toShow(staticUser, authenticated, user)}
+                {authenticated ?
+                    <div>
+                        {user.loading ? '...Loading' : staticUser.loadingStaticUser ? '...Loading' : this.toShow(staticUser)}
+                    </div> :
+                    <div>
+                        {staticUser.loadingStaticUser ? '...Loading' : this.toShow(staticUser)}
+                    </div>
+                }
             </div>
         )
     }
@@ -73,7 +78,6 @@ const mapStateToProps = (state) => ({
 })
 
 const mapActionsToProps = {
-    // logout,
     getStaticUserData
 }
 export default connect(mapStateToProps, mapActionsToProps)(User);

@@ -68,7 +68,7 @@ class About extends Component {
                 {credentials.friends && <Typography variant='body2' className={classes.profileItem}>
                     <RssFeedIcon color='primary' />
                     <span>
-                        {'Followed By '}
+                        {'Freind With '}
                         {credentials.friends.length}
                         {' People'}
                     </span>

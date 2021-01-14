@@ -58,8 +58,8 @@ class SideProfile extends Component {
         let { credentials, classes } = this.props;
         return (
             <div>
-                <Avatar variant='square' alt="profile image" src={credentials.profilePictureUrl} className={classes.profileAvtar1} />
-                <Avatar alt="profile image" src={credentials.profilePictureUrl} className={classes.profileAvtar2} />
+                <Avatar variant='square' alt={credentials.userHandle} src={credentials.profilePictureUrl} className={classes.profileAvtar1} />
+                <Avatar alt={credentials.userHandle} src={credentials.profilePictureUrl} className={classes.profileAvtar2} />
                 <Paper className={classes.paper}>
                     <Typography align='center' variant='h6' className={classes.bolder}>
                         {`@${credentials.userHandle}`}

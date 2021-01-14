@@ -24,7 +24,7 @@ import { connect } from 'react-redux'
 import { SET_AUTHENTICATED, SET_UNAUTHENTICATED } from './redux/types';
 import { getUserData } from './redux/actions/userActions';
 
-axios.defaults.baseURL = 'https://us-central1-socialmedia-76e8b.cloudfunctions.net/api';
+axios.defaults.baseURL = "https://us-central1-socialmedia-76e8b.cloudfunctions.net/api";
 
 let theme = CreateMuiTheme(themeObject)
 
@@ -49,17 +49,14 @@ let App = (props) => {
     <ThemeProvider theme={theme}>
       <div>
         <Router>
-          {authenticated && <Navbar authenticated={authenticated} credentials={props.user.credentials} logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
+          <Navbar authenticated={authenticated} credentials={props.user.credentials} logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />
           <div className="container">
             <Switch>
-              {/* <Route exact path="/" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Home />} />
-              <Route path="/auth/:page?" render={props => <Login {...props} />} />
-              <Route path="/friends" render={() => !props.user.authenticated ? < Redirect to='/auth/login' /> : <Friends />} /> */}
               {authenticated ?
                 <>
                   {<Route exact path='/' component={Home} />}
                   {props.user.credentials && <Route path='/friends' component={Friends} />}
-                  {props.user.credentials && <Route exact path='/user/:handle' component={User} authenticated={authenticated} />}
+                  {<Route exact path='/user/:handle' component={User} authenticated={authenticated} />}
                 </> :
                 <>
                   <Route exact path='/' component={Login} />

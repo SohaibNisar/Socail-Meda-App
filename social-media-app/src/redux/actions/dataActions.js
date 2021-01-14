@@ -14,7 +14,7 @@ import {
 } from '../types';
 import axios from 'axios';
 
-export const uploadPost = (data) => (dispatch) => {
+export const uploadPost = (data) => (dispatch,getState) => {
     dispatch({ type: LOADING_UI })
     axios({
         method: "POST",
@@ -28,7 +28,8 @@ export const uploadPost = (data) => (dispatch) => {
         dispatch({ type: CLEAR_DATA_ERRORS })
         dispatch({
             type: UPLOAD_POST,
-            payload: res.data
+            payload: res.data,
+            user:getState().user,
         })
         dispatch({ type: STOP_LOADING_UI })
     }).catch(err => {

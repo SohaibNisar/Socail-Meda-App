@@ -131,7 +131,7 @@ class Home extends Component {
   toShowFriends = () => {
     let { user, classes } = this.props;
     if (user.credentials) {
-      if (user.credentials.friends.length > 0) {
+      if (user.credentials.friends && user.credentials.friends.length > 0) {
         return (
           <>
             <FriendsList friends={user.credentials.friends} />

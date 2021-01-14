@@ -103,6 +103,7 @@ exports.uploadOnePost = (req, res) => {
         })
         .then(() => {
           const postMediaUrl = `https://firebasestorage.googleapis.com/v0/b/socialmedia-76e8b.appspot.com/o/${imageData.imageFileName}?alt=media&token=${uuid}`;
+          newPost.postMediaPath = imageData.imageFileName;
           newPost.postMedia = postMediaUrl;
           db.collection("posts")
             .add(newPost)

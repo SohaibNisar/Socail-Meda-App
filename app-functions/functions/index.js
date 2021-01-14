@@ -18,9 +18,10 @@ const {
     // addUserDetails,
     markNotificationRead,
     addFriend,
-    getFriendRequests,
+    // getFriendRequests,
     confirmRequest,
-    deleteRequest, unFriend
+    deleteRequest,
+    unFriend
 } = require("./handler/users");
 const { FBAuth } = require("./util/fbAuth");
 const express = require("express");
@@ -40,7 +41,7 @@ app.get("/authenticUser", FBAuth, getAuthenticUserData);
 app.get("/user/:userHandle", getUserData);
 app.get("/sugestedFriends", FBAuth, sugestedFriends);
 app.get("/searchUser/:text", searchFriend);
-app.get("/friendRequests", FBAuth, getFriendRequests);
+// app.get("/friendRequests", FBAuth, getFriendRequests);
 // app.post("/user/addUserDetails", FBAuth, addUserDetails);
 app.post("/user/editProfile", FBAuth, editProfile);
 app.post("/notifications", FBAuth, markNotificationRead);
@@ -60,17 +61,6 @@ app.delete("/post/:postId", FBAuth, deletePost);
 
 exports.api = functions.https.onRequest(app);
 
-// exports.makeUserHandleLower = functions.firestore.document('users/{userHandle}').onCreate((snapshot, context) => {
-//     const userHandle = context.params.userHandle;
-//     db.doc(`users/${userHandle}`).update({
-//         searchUserHandle: userHandle.toLowerCase()
-//     }).then(() => {
-//         console.log('search userHandle updated')
-//     }).catch(err => {
-//         console.log(err)
-//     })
-// })
-
 exports.createLikeNotification = functions.firestore.document('likes/{docId}').onCreate(snapshot => {
     if (snapshot.data().postUserHandle != snapshot.data().userHandle) {
         return db.doc(`notifications/${snapshot.id}`).set({
@@ -83,10 +73,8 @@ exports.createLikeNotification = functions.firestore.document('likes/{docId}').o
             type: 'like',
         }).then(docSnap => {
             console.log('like notification added');
-            // return true;
         }).catch(err => {
             console.log(err.message, err)
-            // return true;
         })
     } else {
         console.log('can not send notification to the same user')
@@ -103,15 +91,12 @@ exports.deleteLikeNotification = functions.firestore.document('likes/{docId}').o
                     // return true;
                 }).catch(err => {
                     console.log(err.message, err)
-                    // return true;
                 })
         } else {
             console.log('like notification not found');
-            // return true
         }
     }).catch(err => {
         console.log(err.message, err)
-        // return true;
     })
 })
 
@@ -127,10 +112,8 @@ exports.createCommentNotification = functions.firestore.document('comments/{docI
             type: 'comment',
         }).then(docSnap => {
             console.log('comment notification added');
-            // return true;
         }).catch(err => {
             console.log(err.message, err)
-            // return true;
         })
     } else {
         console.log('can not send notification to the same user')
@@ -138,25 +121,77 @@ exports.createCommentNotification = functions.firestore.document('comments/{docI
     }
 })
 
+exports.userFriendsUpdate = functions.firestore.document('users/{userHandle}').onUpdate((change, context) => {
+    let beforeData = change.before.data();
+    let afterData = change.after.data();
+    let userHandle = context.params.userHandle;
+    let ref = db.doc(`users/${userHandle}`);
+    let batch = db.batch();
+
+    if (beforeData.friends.length != afterData.friends.length) {
+        let friends = afterData.friends;
+
+        if (!friends) {
+            friends = [];
+        }
+
+        let friendsObj = friends.reduce((acc, value) => {
+            acc[value.userHandle] = true;
+            return acc
+        }, {});
+        batch.update(ref, { friendsObj })
+    }
+
+    if (beforeData.friendRequestsRecieved.length != afterData.friendRequestsRecieved.length) {
+        let friendRequestsRecieved = afterData.friendRequestsRecieved;
+
+        if (!friendRequestsRecieved) {
+            friendRequestsRecieved = [];
+        }
+
+        let friendRequestsRecievedObj = friendRequestsRecieved.reduce((acc, value) => {
+            acc[value.userHandle] = true;
+            return acc
+        }, {});
+        batch.update(ref, { friendRequestsRecievedObj })
+    }
+
+    if (beforeData.friendRequestsSent.length != afterData.friendRequestsSent.length) {
+        let friendRequestsSent = afterData.friendRequestsSent;
+
+        if (!friendRequestsSent) {
+            friendRequestsSent = [];
+        }
+
+        let friendRequestsSentObj = friendRequestsSent.reduce((acc, value) => {
+            acc[value.userHandle] = true;
+            return acc
+        }, {});
+        batch.update(ref, { friendRequestsSentObj })
+    }
+
+    return batch.commit()
+        .then(() => console.log("friends related objects updated"))
+        .catch(err => console.log(err))
+})
+
 exports.userImageUpdate = functions.firestore.document('users/{userHandle}').onUpdate((change, context) => {
     let beforeData = change.before.data();
     let afterData = change.after.data();
     if (beforeData.profilePictureUrl != afterData.profilePictureUrl) {
-        let imageName = beforeData.profilePictureUrl.slice(76, 115);
+        let imageName = beforeData.profilePictureUrlPath;
         let batch = db.batch();
-        return db.collection('posts')
-            .where('userHandle', '==', context.params.userHandle)
-            .get().then(querySnapshot => {
+        return db.collection('posts').where('userHandle', '==', context.params.userHandle).get()
+            .then(querySnapshot => {
                 if (querySnapshot.empty) {
                     console.log('no posts')
-                    return db.collection('comments').where('userHandle', '==', context.params.userHandle).get()
                 } else {
                     querySnapshot.forEach(doc => {
                         let postDocRef = db.doc(`posts/${doc.id}`)
                         batch.update(postDocRef, { profilePicture: afterData.profilePictureUrl })
                     })
-                    return db.collection('comments').where('userHandle', '==', context.params.userHandle).get()
                 }
+                return db.collection('comments').where('userHandle', '==', context.params.userHandle).get()
             }).then(querySnapshot => {
                 if (querySnapshot.empty) {
                     console.log('no comments')
@@ -166,7 +201,56 @@ exports.userImageUpdate = functions.firestore.document('users/{userHandle}').onU
                         batch.update(commentDocRef, { profilePicture: afterData.profilePictureUrl })
                     })
                 }
-                if (imageName == 'no-profile-picture.png') {
+
+                let p1 = db.collection('users').where(`friendRequestsRecievedObj.${context.params.userHandle}`, '==', true).get();
+                let p2 = db.collection('users').where(`friendsObj.${context.params.userHandle}`, '==', true).get();
+                let p3 = db.collection('users').where(`friendRequestsSentObj.${context.params.userHandle}`, '==', true).get();
+
+                return Promise.all([p1, p2, p3])
+            }).then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    console.log('no friend requests recieved and no friends')
+                } else {
+                    querySnapshot.forEach(docs => {
+                        docs.forEach(doc => {
+                            let userDocRef = db.doc(`users/${doc.id}`);
+
+                            let friendRequestsRecieved = doc.data().friendRequestsRecieved;
+                            let friends = doc.data().friends;
+                            let friendRequestsSent = doc.data().friendRequestsSent;
+
+                            if (!friendRequestsRecieved) {
+                                friendRequestsRecieved = [];
+                            }
+                            if (!friends) {
+                                friends = [];
+                            }
+                            if (!friendRequestsSent) {
+                                friendRequestsSent = [];
+                            }
+
+                            let updatedFriendRequestsRecieved = friendRequestsRecieved.map(request => {
+                                request.userHandle == context.params.userHandle && (request.profilePictureUrl = afterData.profilePictureUrl);
+                                return request;
+                            })
+                            let updatedFriends = friends.map(friend => {
+                                friend.userHandle == context.params.userHandle && (friend.profilePictureUrl = afterData.profilePictureUrl);
+                                return friend;
+                            })
+                            let updatedFriendRequestsSent = friendRequestsSent.map(request => {
+                                request.userHandle == context.params.userHandle && (request.profilePictureUrl = afterData.profilePictureUrl);
+                                return request;
+                            })
+
+                            batch.update(userDocRef, {
+                                friendRequestsRecieved: updatedFriendRequestsRecieved,
+                                friends: updatedFriends,
+                                friendRequestsSent: updatedFriendRequestsSent
+                            })
+                        })
+                    })
+                }
+                if (beforeData.profilePictureUrl == `https://firebasestorage.googleapis.com/v0/b/socialmedia-76e8b.appspot.com/o/no-profile-picture.png?alt=media`) {
                     console.log('default image')
                     return true
                 } else {
@@ -175,10 +259,8 @@ exports.userImageUpdate = functions.firestore.document('users/{userHandle}').onU
             }).then(() => {
                 return batch.commit()
             }).then(() => {
-                console.log('post images updated')
-                console.log('comment images updated')
-                console.log('image deleted')
-            }).catch(err => { console.log(err.message, err) })
+                console.log('images updated')
+            }).catch(err => console.log(err.message, err))
     } else {
         console.log('same image url');
         return true;
@@ -189,6 +271,7 @@ exports.postDelete = functions.firestore.document('posts/{postId}').onDelete((sn
     const postId = context.params.postId;
     const batch = db.batch();
     const postMedia = snapshot.data().postMedia;
+    const postMediaPath = snapshot.data().postMediaPath;
     return db.collection('comments')
         .where('postId', '==', postId).get()
         .then(querySnapshot => {
@@ -218,8 +301,7 @@ exports.postDelete = functions.firestore.document('posts/{postId}').onDelete((sn
                 console.log('no likes')
             }
             if (postMedia) {
-                let imageName = postMedia.slice(76, 115);
-                return admin.storage().bucket().file(imageName).delete()
+                return admin.storage().bucket().file(postMediaPath).delete()
             } else {
                 console.log('no post media')
                 return true
@@ -233,26 +315,3 @@ exports.postDelete = functions.firestore.document('posts/{postId}').onDelete((sn
             console.log(err)
         })
 })
-
-// exports.friendRequestComfirmed = functions.firestore.document('users/{userHandle}').onUpdate((change, context) => {
-//     let beforeData = change.before.data();
-//     let afterData = change.after.data();
-//     if (beforeData.friends.length < afterData.friends.length) {
-//         let batch = db.batch();
-//         let newFriend = afterData.friends.filter(friend => !beforeData.friends.includes(friend))[0];
-//         db.collection('posts').where('userHandle', '==', context.params.userHandle).get().then(querySnapshot => {
-//             if (!querySnapshot.empty) {
-//                 querySnapshot.forEach(doc => {
-//                     batch.update(db.doc(`posts/${doc.id}`), {
-//                         toShow: {
-//                             ...doc.data().toShow,
-//                             [newFriend.userHandle]: true,
-//                         }
-//                     })
-//                 })
-//             }
-//         }).then(()=>{
-//             console.log(object)
-//         })
-//     }
-// })

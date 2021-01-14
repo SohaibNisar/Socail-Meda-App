@@ -56,23 +56,6 @@ exports.getUserData = (req, res) => {
   }
 }
 
-// exports.addUserDetails = (req, res) => {
-//   // console.log(req.body)
-//   let userDetails = validateUserDetails(req.body);
-//   db.collection('users').doc(`${req.userData.userHandle}`).update(userDetails).then((snapshot) => {
-//     return res.status(200).json({
-//       message: `user details added successfully`
-//     });
-//   }).catch((err) => {
-//     return res.status(500).json({
-//       message: "adding user details fail",
-//       errMessage: err.message,
-//       errorCode: err.code,
-//       error: err
-//     });
-//   })
-// }
-
 exports.editProfile = (req, res) => {
   let busboy = new Busboy({ headers: req.headers });
 
@@ -125,6 +108,7 @@ exports.editProfile = (req, res) => {
             .doc(req.userData.userHandle)
             .update({
               profilePictureUrl: profilePictureUrl,
+              profilePictureUrlPath: imageData.imageFileName,
               location: userDetails.location,
               bio: userDetails.bio,
               website: userDetails.website,

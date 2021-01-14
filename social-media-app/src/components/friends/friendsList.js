@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 // components
 import Unfriend from './unfriend';
 import AddFriend from './addFriend';
@@ -27,9 +27,27 @@ const styles = {
 }
 
 class FriendsList extends Component {
-    render() {
-        let { user: { credentials, authenticated }, friends, classes } = this.props;
 
+    toShowButton = (friendUserHandle) => {
+        let { user, user: { credentials, authenticated } } = this.props;
+        if (friendUserHandle && authenticated && user && credentials) {
+            let friends = user.credentials.friends;
+            if (!friends) {
+                friends = []
+            }
+            if (!friends.some(friend => friend.userHandle === friendUserHandle)) {
+                return <AddFriend friendUserHandle={friendUserHandle} />
+            } else {
+                return <Unfriend friendUserHandle={friendUserHandle} />
+            }
+
+        } else {
+            return null
+        }
+    };
+
+    render() {
+        let { user: { credentials }, friends, classes } = this.props;
         return (
             <List className={classes.list}>
                 {friends.map(friend => {
@@ -39,7 +57,8 @@ class FriendsList extends Component {
                                 <>
                                     <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
                                         <ListItemAvatar>
-                                            <Avatar alt='profile' src={friend.profilePicture} />
+                                            {console.log(friend.profilePictureUrl)}
+                                            <Avatar alt={friend.userHandle} src={friend.profilePictureUrl} />
                                         </ListItemAvatar>
                                         <ListItemText
                                             primary={
@@ -50,10 +69,7 @@ class FriendsList extends Component {
                                             secondary={dayjs(friend.createdAt).format('MMM DD, YYYY')}
                                         />
                                         <ListItemSecondaryAction>
-                                            {authenticated && credentials && !credentials.friends.some(x => x.userHandle === friend.userHandle) ?
-                                                <AddFriend friendUserHandle={friend.userHandle} /> :
-                                                <Unfriend friendUserHandle={friend.userHandle} />
-                                            }
+                                            {this.toShowButton(friend.userHandle)}
                                         </ListItemSecondaryAction>
                                     </ListItem>
                                     <Divider variant='middle' component="li" />

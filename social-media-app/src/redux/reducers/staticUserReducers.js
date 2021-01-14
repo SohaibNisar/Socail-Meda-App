@@ -5,6 +5,7 @@ import {
     LIKE_STATIC_USER_POST,
     UNLIKE_STATIC_USER_POST,
     DELETE_POST,
+    UPLOAD_POST,
 } from '../types';
 
 const initialState = {
@@ -59,6 +60,14 @@ export default function (state = initialState, action) {
             }
             return {
                 ...state,
+            }
+        case UPLOAD_POST:
+            let user = action.user;
+            if (user.authenticated && user.credentials && state.credentials && user.credentials.userHandle === state.credentials.userHandle) {
+                state.posts.unshift(action.payload)
+            }
+            return {
+                ...state
             }
         default:
             return state

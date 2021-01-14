@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
         },
         '& .MuiTabScrollButton-root': {
             display: 'none',
-
+            width: 25,
             '@media (max-width: 785px)': {
                 display: 'inline-flex',
             },
@@ -42,9 +42,9 @@ const useStyles = makeStyles((theme) => ({
                 display: 'inline-flex',
             },
         },
-        '& .MuiTabScrollButton-root:nth-child(1)': {
-            width: 25,
-        },
+        // '& .MuiTabScrollButton-root:nth-child(1)': {
+        //     width: 25,
+        // },
     },
     about: {
         '@media (min-width: 600px)': {

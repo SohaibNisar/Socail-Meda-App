@@ -123,7 +123,7 @@ class EditProfile extends Component {
                             <Divider variant='middle' />
                             <DialogContent>
                                 <Typography align='center' component='form' onSubmit={this.editProfile}>
-                                    <Avatar alt="Profile" className={classes.avatar} src={this.state.localFile ? this.state.localFile : credentials.profilePictureUrl} />
+                                    <Avatar alt={credentials.userHandle} className={classes.avatar} src={this.state.localFile ? this.state.localFile : credentials.profilePictureUrl} />
                                     <input
                                         accept="image/*"
                                         className={classes.mediaFile}

@@ -94,7 +94,7 @@ class Navbar extends Component {
 
                                             <MyButton tip='View Profile'
                                                 content={
-                                                    <Avatar alt="Profile" src={this.props.credentials.profilePictureUrl} />
+                                                    <Avatar alt={this.props.credentials.userHandle} src={this.props.credentials.profilePictureUrl} />
                                                 }
                                                 color='inherit'
                                                 size='small'
