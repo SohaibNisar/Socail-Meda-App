@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import dayjs from 'dayjs';
-import { Link } from 'react-router-dom';
+
 // components
 import Unfriend from './unfriend';
 import AddFriend from './addFriend';
@@ -13,12 +13,12 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-// import MuiLink from '@material-ui/core/Link/Link'
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
 
 // redux
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import { getStaticUserData } from '../../redux/actions/staticUserActions';
 
 const styles = {
     list: {
@@ -26,7 +26,7 @@ const styles = {
     },
 }
 
-class FriendsList extends Component {
+class SuggestedFriendsList extends Component {
 
     toShowButton = (friendUserHandle) => {
         let { user, user: { credentials, authenticated } } = this.props;
@@ -46,6 +46,12 @@ class FriendsList extends Component {
         }
     };
 
+    handleClick = (userHandle) => {
+        // let handle = this.props.match.params.handle;
+        // this.setState({ handle });
+        this.props.getStaticUserData(userHandle);
+    }
+
     render() {
         let { user: { credentials }, friends, classes } = this.props;
         return (
@@ -55,7 +61,7 @@ class FriendsList extends Component {
                         <React.Fragment key={friend.userHandle}>
                             {friend.userHandle !== credentials.userHandle &&
                                 <>
-                                    <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
+                                    <ListItem button onClick={() => this.handleClick(friend.userHandle)}>
                                         <ListItemAvatar>
                                             <Avatar alt={friend.userHandle} src={friend.profilePictureUrl} />
                                         </ListItemAvatar>
@@ -86,4 +92,8 @@ const mapStateToProps = (state) => ({
     user: state.user,
 })
 
-export default connect(mapStateToProps)(withStyle(styles)(FriendsList));
+const mapActionsToProps = {
+    getStaticUserData
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyle(styles)(SuggestedFriendsList));

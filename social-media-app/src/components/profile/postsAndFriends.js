@@ -1,7 +1,7 @@
 import React from 'react';
+import SwipeableViews from 'react-swipeable-views';
 
 // components
-import SwipeableViews from 'react-swipeable-views';
 import FriendsList from '../friends/friendsList';
 import Post from '../post/post';
 import About from './about';

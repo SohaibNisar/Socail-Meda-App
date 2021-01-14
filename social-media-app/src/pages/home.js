@@ -191,7 +191,7 @@ class Home extends Component {
             '...Loading'
           }
         </Grid>
-        <Grid item sm={4} md={4} className={classes.sideFriendList} ref={el => (this.container = el)}  >
+        <Grid item sm={4} md={4} className={classes.sideFriendList}>
           {!loadingUser ?
             <Paper>
               {user.credentials && user.credentials.friendRequestsRecieved && user.credentials.friendRequestsRecieved.length > 0 &&

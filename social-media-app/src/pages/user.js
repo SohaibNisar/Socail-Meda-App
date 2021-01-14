@@ -16,11 +16,11 @@ class User extends Component {
         handle: null,
     }
 
-    // componentDidMount() {
-    //     let handle = this.props.match.params.handle;
-    //     this.setState({ handle });
-    //     this.props.getStaticUserData(handle);
-    // }
+    componentDidMount() {
+        let handle = this.props.match.params.handle;
+        this.setState({ handle });
+        this.props.getStaticUserData(handle);
+    }
 
     componentWillReceiveProps(nextProps) {
         let handle = nextProps.match.params.handle;
@@ -80,4 +80,5 @@ const mapStateToProps = (state) => ({
 const mapActionsToProps = {
     getStaticUserData
 }
+
 export default connect(mapStateToProps, mapActionsToProps)(User);
