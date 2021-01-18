@@ -2,15 +2,17 @@ import React, { Component } from 'react'
 
 // commponents
 import Sugestions from '../components/friends/sugestions';
-import SuggestedUserProfile from '../components/friends/suggestedUserProfile';
+import SuggestedUserProfile from '../components/profile/suggestedUser/suggestedUserProfile';
 
 // mui
 import Grid from '@material-ui/core/Grid';
 import withStyles from '@material-ui/core/styles/withStyles';
 
 // redux
+import store from '../redux/store';
 import { connect } from 'react-redux';
 import { getSuggestedFriends } from '../redux/actions/friendsActions';
+import { UNSET_STATIC_USER } from '../redux/types';
 
 const styles = {
     sugestedFriendList: {
@@ -44,12 +46,13 @@ const styles = {
 };
 
 class Friends extends Component {
-
     componentDidMount() {
         this.props.getSuggestedFriends()
     }
 
-
+    componentWillUnmount() {
+        store.dispatch({ type: UNSET_STATIC_USER });
+    }
 
     render() {
         let { suggestedFriends, loadingFriends, credentials, classes } = this.props;
@@ -57,12 +60,12 @@ class Friends extends Component {
 
             <Grid container justify="space-around">
                 <Grid item sm={6} md={5} xs={11} className={classes.sugestedFriendList}>
-
                     {suggestedFriends && credentials && !loadingFriends ?
                         <Sugestions suggestedFriends={suggestedFriends} /> : '...Loading'}
                 </Grid>
                 <Grid item sm={5} md={6} xs={11} className={classes.sugestedFriendProfile}>
-                    <SuggestedUserProfile />
+                    {suggestedFriends && credentials && !loadingFriends ?
+                        <SuggestedUserProfile /> : '...Loading'}
                 </Grid>
             </Grid>
         )

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import jwtDecode from "jwt-decode";
 import axios from 'axios';
 import './App.css';
@@ -7,6 +7,7 @@ import './App.css';
 //components
 import Navbar from './components/layout/navbar';
 import themeObject from './util/theme';
+import NoMatch from './components/auth/noMatch';
 
 // pages
 import Home from './pages/home';
@@ -35,11 +36,9 @@ if (token) {
     store.dispatch({ type: SET_AUTHENTICATED });
     store.dispatch(getUserData())
   } else {
-    // logout()
     store.dispatch({ type: SET_UNAUTHENTICATED });
   }
 } else {
-  // logout()
   store.dispatch({ type: SET_UNAUTHENTICATED });
 }
 
@@ -49,21 +48,23 @@ let App = (props) => {
     <ThemeProvider theme={theme}>
       <div>
         <Router>
-          <Navbar authenticated={authenticated} credentials={props.user.credentials} logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />
+          {props.user.authenticated && <Navbar authenticated={authenticated} credentials={props.user.credentials} logout={() => { store.dispatch({ type: SET_UNAUTHENTICATED }) }} />}
           <div className="container">
-            <Switch>
-              {authenticated ?
-                <>
-                  {<Route exact path='/' component={Home} />}
-                  {props.user.credentials && <Route path='/friends' component={Friends} />}
-                  {<Route exact path='/user/:handle' component={User} authenticated={authenticated} />}
-                </> :
-                <>
-                  <Route exact path='/' component={Login} />
-                  <Route exact path='/user/:handle' component={User} authenticated={authenticated} />
-                </>
-              }
-            </Switch>
+            {authenticated ?
+              <Switch>
+                <Route exact path='/' component={Home} />
+                <Route path='/friends' component={Friends} />
+                <Route path='/user/:handle' component={User} />
+                <Route component={NoMatch} />
+              </Switch> :
+              <Switch>
+                <Route exact path='/' component={Login} />
+                <Route path='/user/:handle' component={User} />
+                <Route path="*">
+                  <Redirect to='/' />
+                </Route>
+              </Switch>
+            }
           </div>
         </Router>
       </div>
@@ -76,7 +77,6 @@ const mapStateToProps = (state) => ({
 })
 
 const mapActionsToProps = {
-  // logout,
   getUserData
 }
 export default connect(mapStateToProps, mapActionsToProps)(App);

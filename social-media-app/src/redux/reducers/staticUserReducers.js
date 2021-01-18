@@ -1,5 +1,6 @@
 import {
     SET_STATIC_USER,
+    UNSET_STATIC_USER,
     LOADING_STATIC_USER,
     STOP_LOADING_STATIC_USER,
     LIKE_STATIC_USER_POST,
@@ -20,7 +21,13 @@ export default function (state = initialState, action) {
             return {
                 ...state,
                 ...action.payload
-            }
+            };
+        case UNSET_STATIC_USER:
+            return {
+                loadingStaticUser: false,
+                credentials: null,
+                posts: [],
+            };
         case LOADING_STATIC_USER:
             return {
                 ...state,

@@ -2,12 +2,12 @@ import React from 'react';
 import SwipeableViews from 'react-swipeable-views';
 
 // components
-import FriendsList from '../friends/friendsList';
-import Post from '../post/post';
-import About from './about';
-import AddFriend from '../friends/addFriend';
-import Unfriend from '../friends/unfriend';
-import EditProfile from './editProfile';
+import FriendsList from '../../friends/friendsList';
+import Post from '../../post/post';
+import About from '../about';
+import AddFriend from '../../friends/addFriend';
+import Unfriend from '../../friends/unfriend';
+import EditProfile from '../editProfile';
 
 // mui
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -42,9 +42,6 @@ const useStyles = makeStyles((theme) => ({
                 display: 'inline-flex',
             },
         },
-        // '& .MuiTabScrollButton-root:nth-child(1)': {
-        //     width: 25,
-        // },
     },
     about: {
         '@media (min-width: 600px)': {
@@ -68,7 +65,7 @@ let FullWidthTabs = (props) => {
     const classes = useStyles();
     const theme = useTheme();
     const [value, setValue] = React.useState(0);
-    let { user, user: { authenticated }, staticUser: { credentials: { friends }, posts, credentials } } = props;
+    let { user, user: { authenticated }, staticUser: { credentials: { friends,staticUserHandle }, posts, credentials } } = props;
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -94,9 +91,10 @@ let FullWidthTabs = (props) => {
 
     const toShowFriends = () => {
         if (friends) {
-            let index = friends.findIndex(request => request.userHandle === user.credentials.userHandle)
-            if (index >= 0) {
-                friends.splice(index, 1)
+            if (authenticated) {
+                friends = friends.filter(friend => friend.userHandle !== user.credentials.userHandle && friend.userHandle !== staticUserHandle)
+            } else {
+                friends = friends.filter(friend => friend.userHandle !== staticUserHandle)
             }
             if (friends.length > 0) {
                 return (

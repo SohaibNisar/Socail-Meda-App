@@ -51,6 +51,7 @@ const style = (theme) => ({
         border: '1px solid gray',
         borderRadius: '10px',
         marginTop: '20px',
+        maxWidth: '100%',
     },
     cancleImage: {
         position: 'absolute',
@@ -76,12 +77,12 @@ class UploadPost extends Component {
     }
 
     componentWillReceiveProps(nextprops) {
-        if (nextprops.data.errors) {
+        if (nextprops.UI.errors && nextprops.UI.errors !== this.state.errors) {
             this.setState({
-                errors: nextprops.data.errors,
+                errors: nextprops.UI.errors,
             })
         }
-        if (!nextprops.data.errors && !nextprops.UI.loading) {
+        if (!nextprops.UI.errors && !nextprops.UI.loading) {
             this.setState({
                 open: false,
                 body: null,
@@ -161,7 +162,7 @@ class UploadPost extends Component {
                         <form className={classes.form} noValidate autoComplete="off" onSubmit={this.handleSubmit}>
                             <TextField
                                 id="body"
-                                label='Enter Text'
+                                label={this.state.errors.postBody ? 'Enter Text' : null}
                                 type='text'
                                 name='body'
                                 placeholder={`What's on you mind, ${userHandle} ?`}
@@ -169,6 +170,7 @@ class UploadPost extends Component {
                                 fullWidth
                                 onChange={this.handleChange}
                                 helperText={this.state.errors.postBody}
+                                focused={this.state.errors.postBody ? true : false}
                                 error={this.state.errors.postBody ? true : false}
                             />
                             <input

@@ -128,6 +128,26 @@ exports.userFriendsUpdate = functions.firestore.document('users/{userHandle}').o
     let ref = db.doc(`users/${userHandle}`);
     let batch = db.batch();
 
+    if (!beforeData.friends) {
+        beforeData.friends=[];
+    }
+    if (!beforeData.friendRequestsRecieved) {
+        beforeData.friendRequestsRecieved=[];
+    }
+    if (!beforeData.friendRequestsSent) {
+        beforeData.friendRequestsSent=[];
+    }
+
+    if (!afterData.friends) {
+        afterData.friends=[];
+    }
+    if (!afterData.friendRequestsRecieved) {
+        afterData.friendRequestsRecieved=[];
+    }
+    if (!afterData.friendRequestsSent) {
+        afterData.friendRequestsSent=[];
+    }
+
     if (beforeData.friends.length != afterData.friends.length) {
         let friends = afterData.friends;
 

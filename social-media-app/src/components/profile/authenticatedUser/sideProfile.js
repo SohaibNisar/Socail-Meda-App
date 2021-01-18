@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 // components
-import About from './about';
+import About from '../about';
 
 // mui 
 import withStyles from '@material-ui/core/styles/withStyles';

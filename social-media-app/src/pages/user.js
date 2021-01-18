@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
+import { withRouter } from "react-router";
 
 // components
-import Profile from '../components/profile/profile';
+import Navbar from '../components/layout/navbar';
+import Profile from '../components/profile/authenticatedUser/profile';
 
-// redux
-import { connect } from 'react-redux';
-import { getStaticUserData } from '../redux/actions/staticUserActions';
-
-// components
+// mui
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+
+// redux
+import store from '../redux/store';
+import { connect } from 'react-redux';
+import { getStaticUserData } from '../redux/actions/staticUserActions';
+import { UNSET_STATIC_USER } from '../redux/types';
 
 class User extends Component {
     state = {
@@ -28,6 +32,10 @@ class User extends Component {
             this.setState({ handle });
             this.props.getStaticUserData(handle);
         }
+    }
+
+    componentWillUnmount() {
+        store.dispatch({ type: UNSET_STATIC_USER });
     }
 
     toShow = (staticUser) => {
@@ -63,6 +71,7 @@ class User extends Component {
                         {user.loading ? '...Loading' : staticUser.loadingStaticUser ? '...Loading' : this.toShow(staticUser)}
                     </div> :
                     <div>
+                        <Navbar/>
                         {staticUser.loadingStaticUser ? '...Loading' : this.toShow(staticUser)}
                     </div>
                 }
@@ -78,7 +87,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapActionsToProps = {
-    getStaticUserData
+    getStaticUserData,
 }
 
-export default connect(mapStateToProps, mapActionsToProps)(User);
+export default connect(mapStateToProps, mapActionsToProps)(withRouter(User));

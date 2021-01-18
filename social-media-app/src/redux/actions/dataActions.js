@@ -11,6 +11,7 @@ import {
     UNLIKE_POST,
     DELETE_POST,
     UPLOAD_POST,
+    SET_ERRORS
 } from '../types';
 import axios from 'axios';
 
@@ -33,7 +34,10 @@ export const uploadPost = (data) => (dispatch,getState) => {
         })
         dispatch({ type: STOP_LOADING_UI })
     }).catch(err => {
-        dispatch(setError(err))
+        dispatch(dispatch({
+            type: SET_ERRORS,
+            payload: err.response.data
+        }))
         dispatch({ type: STOP_LOADING_UI })
     })
 }

@@ -37,7 +37,7 @@ exports.getUserData = (req, res) => {
     db.doc(`users/${userHandle}`).get()
       .then(doc => {
         if (!doc.exists) {
-          return res.status(404).json({ message: 'no such user found' })
+          return res.status(404).json({ message: 'no such user found' });
         } else {
           userData.credentials = doc.data();
           return db.collection('posts').where('userHandle', '==', userHandle).get()
@@ -50,9 +50,11 @@ exports.getUserData = (req, res) => {
         });
         return res.json(userData)
       })
-      .catch(err => res.status(500).json({ errMessage: err.message, err }))
+      .catch(err => {
+        return res.status(500).json({ errMessage: err.message, err });
+      })
   } else {
-    return res.status(404).json({ message: 'userHandle is not defined' })
+    return res.status(404).json({ message: 'userHandle is not defined' });
   }
 }
 
@@ -488,7 +490,12 @@ exports.unFriend = (req, res) => {
 
 exports.sugestedFriends = (req, res) => {
   let friends = req.userData.friends;
-  let requests = req.userData.friendRequests;
+  let requestsSent = req.userData.friendRequestsSent;
+  let requestsRecieved = req.userData.friendRequestsRecieved;
+
+  if (!friends) friends = [];
+  if (!requestsSent) requestsSent = [];
+  if (!requestsRecieved) requestsRecieved = [];
 
   let noFreiends = () => {
     db.collection('users')
@@ -503,13 +510,11 @@ exports.sugestedFriends = (req, res) => {
               profilePictureUrl: doc.data().profilePictureUrl,
             })
           })
-          if (!friends) friends = [];
-          if (!requests) requests = [];
-
           let filteredSugestedFriends = sugestedFriends.filter(friend => {
             if (friend.userHandle !== req.userData.userHandle &&
               !friends.some(item => item.userHandle === friend.userHandle) &&
-              !requests.some(item => item.userHandle === friend.userHandle)
+              !requestsSent.some(item => item.userHandle === friend.userHandle) &&
+              !requestsRecieved.some(item => item.userHandle === friend.userHandle)
             ) {
               return true
             } else {
@@ -530,7 +535,7 @@ exports.sugestedFriends = (req, res) => {
   }
 
   if (friends) {
-    if (friends.length > 0) {
+    if (friends.length > 5) {
       let promises = [];
       friends.forEach(friend => {
         if (friend.userHandle != req.userData.userHandle) {
@@ -543,25 +548,18 @@ exports.sugestedFriends = (req, res) => {
         querySnapshot.forEach(doc => {
           sugestedFriends.push(...doc.data().friends)
         })
-        if (sugestedFriends.length > 0) {
-          if (sugestedFriends.length > 20) {
-            if (!requests) requests = [];
-
-            let filteredSugestedFriends = sugestedFriends.filter(friend => {
-              if (friend.userHandle !== req.userData.userHandle &&
-                !friends.some(item => item.userHandle === friend.userHandle) &&
-                !requests.some(item => item.userHandle === friend.userHandle)
-              ) {
-                return true
-              } else {
-                return false
-              }
-            })
-
-            return res.json(filteredSugestedFriends)
+        let filteredSugestedFriends = sugestedFriends.filter(friend => {
+          if (friend.userHandle !== req.userData.userHandle &&
+            !requestsSent.some(item => item.userHandle === friend.userHandle) &&
+            !requestsRecieved.some(item => item.userHandle === friend.userHandle)
+          ) {
+            return true
           } else {
-            noFreiends()
+            return false
           }
+        })
+        if (filteredSugestedFriends.length > 40) {
+          return res.json(filteredSugestedFriends)
         } else {
           noFreiends()
         }

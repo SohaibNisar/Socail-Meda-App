@@ -57,6 +57,7 @@ class Navbar extends Component {
 
     handleLogout = () => {
         this.setState({ anchorEl: null });
+        this.props.history.push('/');
         this.props.logout();
     }
 

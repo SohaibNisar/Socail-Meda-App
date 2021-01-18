@@ -47,33 +47,34 @@ class FriendsList extends Component {
     };
 
     render() {
-        let { user: { credentials }, friends, classes } = this.props;
+        let { user: { credentials, authenticated }, friends, classes } = this.props;
+        if (authenticated) {
+            friends = friends.filter(friend => friend.userHandle !== credentials.userHandle);
+        }
         return (
             <List className={classes.list}>
                 {friends.map(friend => {
                     return (
                         <React.Fragment key={friend.userHandle}>
-                            {friend.userHandle !== credentials.userHandle &&
-                                <>
-                                    <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
-                                        <ListItemAvatar>
-                                            <Avatar alt={friend.userHandle} src={friend.profilePictureUrl} />
-                                        </ListItemAvatar>
-                                        <ListItemText
-                                            primary={
-                                                <Typography color='primary' >
-                                                    {`@${friend.userHandle}`}
-                                                </Typography>
-                                            }
-                                            secondary={dayjs(friend.createdAt).format('MMM DD, YYYY')}
-                                        />
-                                        <ListItemSecondaryAction>
-                                            {this.toShowButton(friend.userHandle)}
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                    <Divider variant='middle' component="li" />
-                                </>
-                            }
+                            {<>
+                                <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
+                                    <ListItemAvatar>
+                                        <Avatar alt={friend.userHandle} src={friend.profilePictureUrl} />
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={
+                                            <Typography color='primary' >
+                                                {`@${friend.userHandle}`}
+                                            </Typography>
+                                        }
+                                        secondary={dayjs(friend.createdAt).format('MMM DD, YYYY')}
+                                    />
+                                    <ListItemSecondaryAction>
+                                        {this.toShowButton(friend.userHandle)}
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                                <Divider variant='middle' component="li" />
+                            </>}
                         </React.Fragment>
                     )
                 })}
