@@ -102,12 +102,15 @@ let FullWidthTabs = (props) => {
     };
 
     const toShowButton = () => {
-        if (authenticated && user) {
+        if (authenticated && user && user.credentials) {
+            if (!user.credentials.friends) {
+                user.credentials.friends = [];
+            }
             if (user.credentials.userHandle === credentials.userHandle) {
                 return <EditProfile />
             } else {
                 if (!user.credentials.friends.some(friend => friend.userHandle === credentials.userHandle)) {
-                    return <AddFriend friendUserHandle={credentials.userHandle} />
+                    return <AddFriend verticle={true} friendUserHandle={credentials.userHandle} />
                 } else {
                     return <Unfriend friendUserHandle={credentials.userHandle} />
                 }

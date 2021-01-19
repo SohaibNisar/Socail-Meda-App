@@ -23,6 +23,9 @@ import { getStaticUserData } from '../../redux/actions/staticUserActions';
 const styles = {
     list: {
         width: '100%',
+        paddingLeft:5,
+        paddingRight:5,
+        boxSizing:'border-box',
     },
 }
 

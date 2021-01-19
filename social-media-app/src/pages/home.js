@@ -51,6 +51,7 @@ let styles = {
     position: 'sticky',
     top: '0px',
     zIndex: '10',
+    borderBottom: '5px solid'
   },
   marginBottomLarge: {
     marginBottom: 20,

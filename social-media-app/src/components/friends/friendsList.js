@@ -23,6 +23,12 @@ import { connect } from 'react-redux'
 const styles = {
     list: {
         width: '100%',
+        paddingLeft: 5,
+        paddingRight: 5,
+        boxSizing: 'border-box',
+    },
+    inline: {
+        display: 'inline',
     },
 }
 
@@ -38,7 +44,11 @@ class FriendsList extends Component {
             if (!friends.some(friend => friend.userHandle === friendUserHandle)) {
                 return <AddFriend friendUserHandle={friendUserHandle} />
             } else {
-                return <Unfriend friendUserHandle={friendUserHandle} />
+                return (
+                    <ListItemSecondaryAction>
+                        <Unfriend friendUserHandle={friendUserHandle} />
+                    </ListItemSecondaryAction>
+                )
             }
 
         } else {
@@ -52,12 +62,12 @@ class FriendsList extends Component {
             friends = friends.filter(friend => friend.userHandle !== credentials.userHandle);
         }
         return (
-            <List className={classes.list}>
+            <List className={classes.list} >
                 {friends.map(friend => {
                     return (
                         <React.Fragment key={friend.userHandle}>
                             {<>
-                                <ListItem button component={Link} to={`/user/${friend.userHandle}`}>
+                                <ListItem alignItems="flex-start" button component={Link} to={`/user/${friend.userHandle}`}>
                                     <ListItemAvatar>
                                         <Avatar alt={friend.userHandle} src={friend.profilePictureUrl} />
                                     </ListItemAvatar>
@@ -67,11 +77,20 @@ class FriendsList extends Component {
                                                 {`@${friend.userHandle}`}
                                             </Typography>
                                         }
-                                        secondary={dayjs(friend.createdAt).format('MMM DD, YYYY')}
+                                        secondary={
+                                            <Typography
+                                                component="div"
+                                                variant="body2"
+                                                className={classes.inline}
+                                                color="textPrimary"
+                                            >
+                                                <span>
+                                                    {dayjs(friend.createdAt).format('MMM DD, YYYY')}
+                                                </span>
+                                                {this.toShowButton(friend.userHandle)}
+                                            </Typography>
+                                        }
                                     />
-                                    <ListItemSecondaryAction>
-                                        {this.toShowButton(friend.userHandle)}
-                                    </ListItemSecondaryAction>
                                 </ListItem>
                                 <Divider variant='middle' component="li" />
                             </>}

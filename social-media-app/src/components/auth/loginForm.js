@@ -76,7 +76,9 @@ class LoginForm extends Component {
                 <Typography variant='h5'>Login</Typography>
                 <Grid container justify="center" alignItems="center">
                     <Grid item sm={8} md={7} xs={11} >
-                        <form className={classes.form} noValidate autoComplete="off" onSubmit={this.handleSubmit}>
+                        <form className={classes.form} noValidate 
+                        // autoComplete="off" 
+                        onSubmit={this.handleSubmit}>
                             <TextField
                                 id="email"
                                 label="Email"

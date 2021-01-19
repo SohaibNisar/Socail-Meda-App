@@ -4,15 +4,36 @@ import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
+import Divider from '@material-ui/core/Divider';
 
 // redux
 import { connect } from 'react-redux';
 import { addFriend, cancelRequest, confirmRequest } from '../../redux/actions/friendsActions';
 
 let styles = theme => ({
-    grayButton: {
+    confirmBtn: {
+        minWidth: 80,
+    },
+    deleteBtn: {
+        minWidth: 80,
+    },
+    deleteBtnVerticle:{
+        marginLeft: 10,
+    },
+    addBtn: {
+        minWidth: 98,
+    },
+    cancelBtn: {
+        minWidth: 136,
         backgroundColor: theme.palette.tertiary.main,
-    }
+    },
+    divider: {
+        margin: '10px 0px',
+    },
+    multiButton: {
+        display: 'flex',
+        justifyContent: 'space-evenly',
+    },
 })
 
 class AddFriend extends Component {
@@ -22,7 +43,8 @@ class AddFriend extends Component {
     }
 
     handleCancelRequest = (userHandle) => {
-        this.props.cancelRequest(userHandle);
+        // this.props.cancelRequest(userHandle);
+        alert(userHandle)
     }
 
     handleConfirmRequest = (userHandle) => {
@@ -30,7 +52,7 @@ class AddFriend extends Component {
     }
 
     render() {
-        let { user: { credentials: { friendRequestsSent, friendRequestsRecieved }, authenticated }, friendUserHandle, classes } = this.props;
+        let { verticle, user: { credentials: { friendRequestsSent, friendRequestsRecieved }, authenticated }, friendUserHandle, classes } = this.props;
 
         if (!friendRequestsSent) {
             friendRequestsSent = [];
@@ -38,20 +60,28 @@ class AddFriend extends Component {
         if (!friendRequestsRecieved) {
             friendRequestsRecieved = [];
         }
-        
+
         let requested = friendRequestsSent && (friendRequestsSent.some(request => request.userHandle === friendUserHandle));
         let recieved = friendRequestsRecieved && (friendRequestsRecieved.some(request => request.userHandle === friendUserHandle));
 
         return (
             <>
                 {authenticated && (recieved ?
-                    <Button variant="contained" size='small' color='primary' style={{ minWidth: 98, }} onClick={() => this.handleConfirmRequest(friendUserHandle)} >
-                        <Typography variant='caption' >Confirm</Typography >
-                    </Button > : !requested ?
-                        <Button variant="contained" size='small' color='primary' style={{ minWidth: 98, }} onClick={() => this.handleAddFriend(friendUserHandle)} >
+                    <>
+                        {!verticle && <Divider className={classes.divider} />}
+                        <div className={!verticle ? classes.multiButton:undefined}>
+                            <Button variant="contained" size='small' color='primary' className={classes.confirmBtn} onClick={() => this.handleConfirmRequest(friendUserHandle)} >
+                                <Typography variant='caption' >Confirm</Typography >
+                            </Button >
+                            <Button variant="outlined" color='secondary' size='small' className={verticle?classes.deleteBtnVerticle:classes.deleteBtn} onClick={() => this.handleCancelRequest(friendUserHandle)} >
+                                <Typography variant='caption'>Delete</Typography>
+                            </Button>
+                        </div>
+                    </> : !requested ?
+                        <Button variant="contained" size='small' color='primary' className={classes.addBtn} onClick={() => this.handleAddFriend(friendUserHandle)} >
                             <Typography variant='caption' >Add Friend</Typography >
                         </Button > :
-                        <Button variant="contained" size='small' className={classes.grayButton} style={{ minWidth: 136, }} onClick={() => this.handleCancelRequest(friendUserHandle)} >
+                        <Button variant="contained" size='small' className={classes.cancelBtn} onClick={() => this.handleCancelRequest(friendUserHandle)} >
                             <Typography variant='caption'>Cancel Request</Typography>
                         </Button>
                 )}

@@ -128,7 +128,7 @@ let FullWidthTabs = (props) => {
                 return <EditProfile />
             } else {
                 if (!user.credentials.friends.some(friend => friend.userHandle === credentials.userHandle)) {
-                    return <AddFriend friendUserHandle={credentials.userHandle} />
+                    return <AddFriend verticle={true} friendUserHandle={credentials.userHandle} />
                 } else {
                     return <Unfriend friendUserHandle={credentials.userHandle} />
                 }
