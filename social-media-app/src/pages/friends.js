@@ -25,7 +25,7 @@ const styles = {
                 display: 'unset',
             },
             '&::-webkit-scrollbar-thumb': {
-                boxShadow: 'inset 0 0 0 10px',
+                boxShadow: 'inset 0 0 0 10px rgb(140, 142, 142)',
             },
         },
         '&::-webkit-scrollbar': {

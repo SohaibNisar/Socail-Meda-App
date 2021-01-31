@@ -12,7 +12,7 @@ class Nothing extends Component {
     render() {
         return (
             <Typography component='span' align='center' gutterBottom>
-                <Card>
+                <Card style={this.props.noShadow && { boxShadow: 'none' }}>
                     {this.props.mainText && <Typography style={{ fontWeight: 'bolder', marginTop: '20px' }}>
                         {this.props.mainText}
                     </Typography>}

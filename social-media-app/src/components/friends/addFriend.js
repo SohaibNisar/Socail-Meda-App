@@ -15,9 +15,8 @@ let styles = theme => ({
     },
     deleteBtn: {
         minWidth: 80,
-    },
-    deleteBtnVerticle: {
         marginLeft: 10,
+        backgroundColor: '#fff',
     },
     addBtn: {
         minWidth: 98,
@@ -27,28 +26,30 @@ let styles = theme => ({
         backgroundColor: theme.palette.tertiary.main,
     },
     multiButton: {
+        dispaly: 'block',
         maxWidth: 275,
-        display: 'flex',
-        justifyContent: 'space-evenly',
     },
 })
 
 class AddFriend extends Component {
 
-    handleAddFriend = (userHandle) => {
+    handleAddFriend = (e, userHandle) => {
+        e.preventDefault();
         this.props.addFriend(userHandle);
     }
 
-    handleCancelRequest = (userHandle) => {
+    handleCancelRequest = (e, userHandle) => {
         this.props.cancelRequest(userHandle);
+        e.preventDefault();
     }
 
-    handleConfirmRequest = (userHandle) => {
+    handleConfirmRequest = (e, userHandle) => {
+        e.preventDefault();
         this.props.confirmRequest(userHandle);
     }
 
     render() {
-        let { verticle, user: { credentials: { friendRequestsSent, friendRequestsRecieved }, authenticated }, friendUserHandle, classes } = this.props;
+        let { user: { credentials: { friendRequestsSent, friendRequestsRecieved }, authenticated }, friendUserHandle, classes } = this.props;
 
         if (!friendRequestsSent) {
             friendRequestsSent = [];
@@ -64,19 +65,19 @@ class AddFriend extends Component {
             <>
                 {authenticated && (recieved ?
                     <>
-                        <div className={!verticle ? classes.multiButton : undefined}>
-                            <Button variant="contained" size='small' color='primary' className={classes.confirmBtn} onClick={() => this.handleConfirmRequest(friendUserHandle)} >
+                        <span className={classes.multiButton}>
+                            <Button variant="contained" size='small' color='primary' component='span' className={classes.confirmBtn} onClick={(e) => this.handleConfirmRequest(e, friendUserHandle)} >
                                 <Typography variant='caption' >Confirm</Typography >
                             </Button >
-                            <Button variant="outlined" color='secondary' size='small' className={verticle ? classes.deleteBtnVerticle : classes.deleteBtn} onClick={() => this.handleCancelRequest(friendUserHandle)} >
+                            <Button variant="outlined" color='secondary' size='small' component='span' className={classes.deleteBtn} onClick={(e) => this.handleCancelRequest(e, friendUserHandle)} >
                                 <Typography variant='caption'>Delete</Typography>
                             </Button>
-                        </div>
+                        </span>
                     </> : !requested ?
-                        <Button variant="contained" size='small' color='primary' className={classes.addBtn} onClick={() => this.handleAddFriend(friendUserHandle)} >
+                        <Button variant="contained" size='small' color='primary' component='span' className={classes.addBtn} onClick={(e) => this.handleAddFriend(e, friendUserHandle)} >
                             <Typography variant='caption' >Add Friend</Typography >
                         </Button > :
-                        <Button variant="contained" size='small' className={classes.cancelBtn} onClick={() => this.handleCancelRequest(friendUserHandle)} >
+                        <Button variant="contained" size='small' component='span' className={classes.cancelBtn} onClick={(e) => this.handleCancelRequest(e, friendUserHandle)} >
                             <Typography variant='caption'>Cancel Request</Typography>
                         </Button>
                 )}

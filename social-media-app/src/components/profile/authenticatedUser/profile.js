@@ -14,26 +14,26 @@ const styles = theme => ({
         top: '70px',
         overflow: 'auto',
         maxHeight: 'calc(100vh - 90px)',
+        '@media(max-width: 900px)': {
+          display: 'none',
+        },
         '&:hover': {
-            '&::-webkit-scrollbar': {
-                display: 'unset',
-            }
+          '&::-webkit-scrollbar': {
+            display: 'unset',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            boxShadow: 'inset 0 0 0 10px rgb(140, 142, 142)',
+          },
         },
         '&::-webkit-scrollbar': {
-            width: '14px',
-            display: 'none',
+          width: '14px',
         },
         '&::-webkit-scrollbar-thumb': {
-            background: 'content-box',
-            border: '4px solid transparent',
-            borderRadius: '7px',
-            boxShadow: 'inset 0 0 0 10px'
+          background: 'content-box',
+          border: '4px solid transparent',
+          borderRadius: '7px',
+          boxShadow: 'transparent 0 0 0 10px',
         },
-        '@media (max-width: 600px)': {
-            position: 'unset',
-            maxHeight: 'unset',
-            overflow: 'unset',
-        }
     },
 })
 

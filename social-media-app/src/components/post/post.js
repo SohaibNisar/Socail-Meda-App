@@ -4,8 +4,8 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 // components
-import MyButton from '../../util/myButton';
 import DeletePost from './deletePost';
+import MyButton from '../../util/myButton';
 
 // mui
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -20,6 +20,9 @@ import FavoriteIcon from '@material-ui/icons/Favorite';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import ChatIcon from '@material-ui/icons/Chat';
 import MuiLink from '@material-ui/core/Link/Link';
+import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
+import Divider from '@material-ui/core/Divider';
 
 // redux
 import { connect } from "react-redux";
@@ -32,12 +35,12 @@ const styles = {
         marginBottom: 40,
     },
     media: {
-        // height: 0,
-        // paddingTop: '56.25%', 
-        // paddingTop: '100%',
         width: 'unset',
         maxWidth: '100%',
         margin: '0 auto 20px auto',
+    },
+    likeAndCommentCounts:{
+        borderTop:'1 solid #000',
     },
 }
 
@@ -88,6 +91,11 @@ class Post extends Component {
                     image={post.postMedia}
                     title={post.id}
                 />}
+                <div className={classes.likeAndCommentCounts}>
+                    <span>{post.likesCount} Likes</span>
+                    <span>{post.commentsCount} Comments</span>
+                </div>
+                <Divider variant='middle' component="li" className={classes.divider} />
                 <CardActions disableSpacing>
                     {!authenticated ?
                         <MuiLink component={Link} to='/' >
@@ -104,12 +112,21 @@ class Post extends Component {
                                 color='primary'
                                 onClick={() => this.unlikePost(post.id)}
                             /> :
-                            <MyButton
-                                tip='Like'
-                                content={<FavoriteBorderIcon />}
-                                color='primary'
-                                onClick={() => this.likePost(post.id)}
-                            />
+                            // <MyButton
+                            //     tip='Like'
+                            //     content={<FavoriteBorderIcon />}
+                            //     color='primary'
+                            //     onClick={() => this.likePost(post.id)}
+                            // />
+                            <Tooltip title='Like' arrow>
+                                <Button
+                                    color="primary"
+                                    // className={classes.button}
+                                    startIcon={<FavoriteBorderIcon />}
+                                >
+                                    <span>{post.likesCount} Likes</span>
+                                </Button>
+                            </Tooltip>
                     }
                     <span>{post.likesCount} Likes</span>
                     <MyButton tip='Comment' content={<ChatIcon />} color='primary' />
@@ -125,7 +142,6 @@ const mapStateToProps = (state) => ({
 })
 
 const mapActionsToProps = {
-    // getPosts,
     likePost,
     unlikePost,
     likeStaticUserPost,

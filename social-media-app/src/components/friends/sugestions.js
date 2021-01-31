@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 // components
-import SuggestedFriendsList from '../friends/suggestedFriendsList';
+import FriendsList from './friendsList';
 
 // mui
 import Paper from '@material-ui/core/Paper';
@@ -23,7 +23,7 @@ class Sugestion extends Component {
             if (friends.length > 0) {
                 return (
                     <Paper>
-                        <SuggestedFriendsList friends={friends} />
+                        <FriendsList friendsToList={friends} suggestionList/>
                     </Paper>
                 )
             } else {

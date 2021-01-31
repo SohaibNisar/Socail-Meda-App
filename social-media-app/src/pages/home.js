@@ -4,6 +4,7 @@ import React, { Component } from "react";
 import Post from '../components/post/post';
 import Nothing from '../util/nothing';
 import FriendsList from '../components/friends/friendsList';
+import RequestList from '../components/friends/requestList';
 
 
 // mui
@@ -30,7 +31,7 @@ let styles = {
         display: 'unset',
       },
       '&::-webkit-scrollbar-thumb': {
-        boxShadow: 'inset 0 0 0 10px',
+        boxShadow: 'inset 0 0 0 10px rgb(140, 142, 142)',
       },
     },
     '&::-webkit-scrollbar': {
@@ -70,6 +71,9 @@ class Home extends Component {
   toShowPosts = () => {
     let { data: { posts }, data: { errors }, classes } = this.props;
     if (errors) {
+      if (errors.errorCode === 'auth/id-token-expired') {
+        window.location.reload();
+      }
       if (errors.other) {
         if (errors.other.message) {
           return (
@@ -135,23 +139,23 @@ class Home extends Component {
       if (user.credentials.friends && user.credentials.friends.length > 0) {
         return (
           <>
-            <FriendsList friendsToList={user.credentials.friends} />
+            <FriendsList friendsToList={user.credentials.friends} lastDivider />
             <div className={classes.marginBottomSmall}>
-              <Nothing mainText='No More Friends' size='small' />
+              <Nothing mainText='No More Friends' size='small' noShadow />
             </div>
           </>
         )
       } else {
         return (
           <div className={classes.marginBottomSmall}>
-            <Nothing mainText='No Friends' />
+            <Nothing mainText='No Friends' noShadow />
           </div>
         )
       }
     } else {
       return (
         <div className={classes.marginBottomSmall}>
-          <Nothing mainText='No Friends' />
+          <Nothing mainText='No Friends' noShadow />
         </div>
       )
     }
@@ -163,7 +167,7 @@ class Home extends Component {
       if (user.credentials.friendRequestsRecieved && user.credentials.friendRequestsRecieved.length > 0) {
         return (
           <>
-            <FriendsList friendsToList={user.credentials.friendRequestsRecieved} />
+            <RequestList friendsToList={user.credentials.friendRequestsRecieved} />
           </>
         )
       } else {
