@@ -16,11 +16,22 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 // import MuiLink from '@material-ui/core/Link/Link'
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
+import Collapse from '@material-ui/core/Collapse';
 
 // redux
 import { connect } from 'react-redux'
 
-const styles = {
+const styles = theme => ({
+    // item: {
+    //     '&:hover': {
+    //         backgroundColor: 'unset',
+    //     }
+    // },
+    // itemLink: {
+    //     '&:hover': {
+    //         backgroundColor: 'unset',
+    //     }
+    // },
     list: {
         width: '100%',
         paddingLeft: 5,
@@ -30,74 +41,72 @@ const styles = {
     inline: {
         display: 'inline',
     },
-}
+    towButtons: {
+        paddingLeft: theme.spacing(4),
+        marginBotom: 5,
+    },
+    divider: {
+        margin: '15px 16px 6px 16px',
+    },
+})
 
 class FriendsList extends Component {
-
-    toShowButton = (friendUserHandle) => {
-        let { user, user: { credentials, authenticated } } = this.props;
-        if (friendUserHandle && authenticated && user && credentials) {
-            let friends = user.credentials.friends;
-            if (!friends) {
-                friends = []
-            }
-            if (!friends.some(friend => friend.userHandle === friendUserHandle)) {
-                return <AddFriend friendUserHandle={friendUserHandle} />
-            } else {
-                return (
-                    <ListItemSecondaryAction>
-                        <Unfriend friendUserHandle={friendUserHandle} />
-                    </ListItemSecondaryAction>
-                )
-            }
-
-        } else {
-            return null
-        }
-    };
-
     render() {
-        let { user: { credentials, authenticated }, friends, classes } = this.props;
-        if (authenticated) {
-            friends = friends.filter(friend => friend.userHandle !== credentials.userHandle);
+        let { user, user: { credentials: { friends } }, friendsToList, classes } = this.props;
+        if (user && user.authenticated && user.credentials) {
+            if (!friendsToList) {
+                friendsToList = [];
+            }
+            if (!friends) {
+                friends = [];
+            }
+            friendsToList = friendsToList.filter(friend => friend.userHandle !== user.credentials.userHandle);
         }
         return (
-            <List className={classes.list} >
-                {friends.map(friend => {
-                    return (
-                        <React.Fragment key={friend.userHandle}>
-                            {<>
-                                <ListItem alignItems="flex-start" button component={Link} to={`/user/${friend.userHandle}`}>
-                                    <ListItemAvatar>
-                                        <Avatar alt={friend.userHandle} src={friend.profilePictureUrl} />
-                                    </ListItemAvatar>
-                                    <ListItemText
-                                        primary={
-                                            <Typography color='primary' >
-                                                {`@${friend.userHandle}`}
-                                            </Typography>
-                                        }
-                                        secondary={
-                                            <Typography
-                                                component="div"
-                                                variant="body2"
-                                                className={classes.inline}
-                                                color="textPrimary"
-                                            >
-                                                <span>
-                                                    {dayjs(friend.createdAt).format('MMM DD, YYYY')}
-                                                </span>
-                                                {this.toShowButton(friend.userHandle)}
-                                            </Typography>
-                                        }
-                                    />
-                                </ListItem>
-                                <Divider variant='middle' component="li" />
-                            </>}
-                        </React.Fragment>
-                    )
-                })}
-            </List>
+            <>
+                <List className={classes.list} >
+                    {friendsToList.map(friend => {
+                        return (
+                            <React.Fragment key={friend.userHandle} >
+                                {<React.Fragment>
+                                    <ListItem alignItems="flex-start" button component={Link} to={`/user/${friend.userHandle}`}>
+                                        <ListItemAvatar>
+                                            <Avatar alt={friend.userHandle} src={friend.profilePictureUrl} />
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={
+                                                <Typography color='primary' >
+                                                    {`@${friend.userHandle}`}
+                                                </Typography>
+                                            }
+                                            secondary={
+                                                dayjs(friend.createdAt).format('MMM DD, YYYY')
+                                            }
+                                        />
+                                        <ListItemSecondaryAction>
+                                            {friends.some(friend2 => friend2.userHandle === friend.userHandle) ?
+                                                <Unfriend friendUserHandle={friend.userHandle} /> :
+                                                !friends.some(friend2 => friend2.userHandle === friend.userHandle) &&
+                                                <div className={classes.towButtons}>
+                                                    <Typography
+                                                        component="div"
+                                                        variant="body2"
+                                                        className={classes.inline}
+                                                        color="textPrimary"
+                                                    >
+                                                        <AddFriend friendUserHandle={friend.userHandle} />
+                                                    </Typography>
+                                                </div>
+                                            }
+                                        </ListItemSecondaryAction>
+                                    </ListItem>
+                                    <Divider variant='middle' component="li" className={classes.divider} />
+                                </React.Fragment>}
+                            </React.Fragment>
+                        )
+                    })}
+                </List >
+            </>
         )
     }
 }

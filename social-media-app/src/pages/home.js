@@ -135,7 +135,7 @@ class Home extends Component {
       if (user.credentials.friends && user.credentials.friends.length > 0) {
         return (
           <>
-            <FriendsList friends={user.credentials.friends} />
+            <FriendsList friendsToList={user.credentials.friends} />
             <div className={classes.marginBottomSmall}>
               <Nothing mainText='No More Friends' size='small' />
             </div>
@@ -163,7 +163,7 @@ class Home extends Component {
       if (user.credentials.friendRequestsRecieved && user.credentials.friendRequestsRecieved.length > 0) {
         return (
           <>
-            <FriendsList friends={user.credentials.friendRequestsRecieved} />
+            <FriendsList friendsToList={user.credentials.friendRequestsRecieved} />
           </>
         )
       } else {

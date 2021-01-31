@@ -50,8 +50,6 @@ class SuggestedFriendsList extends Component {
     };
 
     handleClick = (userHandle) => {
-        // let handle = this.props.match.params.handle;
-        // this.setState({ handle });
         this.props.getStaticUserData(userHandle);
     }
 

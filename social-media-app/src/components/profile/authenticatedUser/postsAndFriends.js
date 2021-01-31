@@ -99,7 +99,7 @@ let FullWidthTabs = (props) => {
             if (friends.length > 0) {
                 return (
                     <Paper>
-                        <FriendsList friends={friends} />
+                        <FriendsList friendsToList={friends} />
                     </Paper>
                 )
             } else {

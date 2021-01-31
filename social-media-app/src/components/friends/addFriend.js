@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
-import Divider from '@material-ui/core/Divider';
 
 // redux
 import { connect } from 'react-redux';
@@ -17,7 +16,7 @@ let styles = theme => ({
     deleteBtn: {
         minWidth: 80,
     },
-    deleteBtnVerticle:{
+    deleteBtnVerticle: {
         marginLeft: 10,
     },
     addBtn: {
@@ -27,10 +26,8 @@ let styles = theme => ({
         minWidth: 136,
         backgroundColor: theme.palette.tertiary.main,
     },
-    divider: {
-        margin: '10px 0px',
-    },
     multiButton: {
+        maxWidth: 275,
         display: 'flex',
         justifyContent: 'space-evenly',
     },
@@ -43,8 +40,7 @@ class AddFriend extends Component {
     }
 
     handleCancelRequest = (userHandle) => {
-        // this.props.cancelRequest(userHandle);
-        alert(userHandle)
+        this.props.cancelRequest(userHandle);
     }
 
     handleConfirmRequest = (userHandle) => {
@@ -68,12 +64,11 @@ class AddFriend extends Component {
             <>
                 {authenticated && (recieved ?
                     <>
-                        {!verticle && <Divider className={classes.divider} />}
-                        <div className={!verticle ? classes.multiButton:undefined}>
+                        <div className={!verticle ? classes.multiButton : undefined}>
                             <Button variant="contained" size='small' color='primary' className={classes.confirmBtn} onClick={() => this.handleConfirmRequest(friendUserHandle)} >
                                 <Typography variant='caption' >Confirm</Typography >
                             </Button >
-                            <Button variant="outlined" color='secondary' size='small' className={verticle?classes.deleteBtnVerticle:classes.deleteBtn} onClick={() => this.handleCancelRequest(friendUserHandle)} >
+                            <Button variant="outlined" color='secondary' size='small' className={verticle ? classes.deleteBtnVerticle : classes.deleteBtn} onClick={() => this.handleCancelRequest(friendUserHandle)} >
                                 <Typography variant='caption'>Delete</Typography>
                             </Button>
                         </div>

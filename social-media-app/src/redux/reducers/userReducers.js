@@ -86,9 +86,13 @@ export default function (state = initialState, action) {
             }
         case CANCEL_REQUEST:
             if (state.credentials) {
-                let index = state.credentials.friendRequestsSent.findIndex(request => request.userHandle === action.payload.userHandle)
-                if (index >= 0) {
-                    state.credentials.friendRequestsSent.splice(index, 1)
+                let index1 = state.credentials.friendRequestsRecieved.findIndex(request => request.userHandle === action.payload.userHandle)
+                let index2 = state.credentials.friendRequestsSent.findIndex(request => request.userHandle === action.payload.userHandle)
+                if (index1 >= 0) {
+                    state.credentials.friendRequestsRecieved.splice(index1, 1)
+                }
+                if (index2 >= 0) {
+                    state.credentials.friendRequestsSent.splice(index2, 1)
                 }
             }
             return {

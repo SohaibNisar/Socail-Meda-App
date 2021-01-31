@@ -78,7 +78,7 @@ let FullWidthTabs = (props) => {
             if (friends.length > 0) {
                 return (
                     <Paper elevation={3}>
-                        <FriendsList friends={friends} />
+                        <FriendsList friendsToList={friends} />
                     </Paper>
                 )
             } else {

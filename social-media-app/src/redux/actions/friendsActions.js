@@ -34,7 +34,7 @@ export const addFriend = (userHandle) => (dispatch) => {
             payload: { userHandle },
         });
     }).catch(err => {
-        console.log(err.response.data)
+        console.log(err)
         setError(err)
     })
 }
